@@ -1,16 +1,17 @@
 import unittest
 import type_name
+from type_name import MetaKeys as MK
 
 
 def _build_name_pet_schema():
     return {
-        type_name.MetaKeys.Type: type_name.types.Dict,
-        type_name.MetaKeys.Content: {
+        MK.Type: type_name.types.Dict,
+        MK.Content: {
             'name': {
-                type_name.MetaKeys.Type: type_name.types.String,
+                MK.Type: type_name.types.String,
             },
             'pet': {
-                type_name.MetaKeys.Type: type_name.types.String,
+                MK.Type: type_name.types.String,
             }
         }
     }
@@ -29,6 +30,8 @@ class TestTypes(unittest.TestCase):
         }
         config_suite = _build_name_pet_config_suite(raw_config)
 
+        self.assertTrue(config_suite.valid)
+
         config = config_suite.snapshot
         self.assertEqual(raw_config['name'], config.name)
         self.assertEqual(raw_config['pet'], config.pet)
@@ -41,6 +44,13 @@ class TestTypes(unittest.TestCase):
             }
             config_suite = _build_name_pet_config_suite(raw_config)
 
+            self.assertFalse(config_suite.valid)
+
             config = config_suite.snapshot
             self.assertEqual(raw_config['name'], config.name)
             self.assertEqual(raw_config['pet'], config.pet)
+
+    def test_name_pet_invalid_container(self):
+        for raw_config in [14, None, [{'name': 'Markus'}], ()]:
+            config_suite = _build_name_pet_config_suite(raw_config)
+            self.assertFalse(config_suite.valid)
