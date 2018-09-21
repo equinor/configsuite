@@ -65,6 +65,11 @@ class TestTypes(unittest.TestCase):
 
             self.assertFalse(config_suite.valid)
 
+            self.assertEqual(1, len(config_suite.errors))
+            err = config_suite.errors[0]
+            self.assertIsInstance(err, protoconf.InvalidTypeError)
+            self.assertEqual(('name',), err.key_path)
+
             config = config_suite.snapshot
             self.assertEqual(raw_config['name'], config.name)
             self.assertEqual(raw_config['pet']['name'], config.pet.name)
@@ -78,8 +83,18 @@ class TestTypes(unittest.TestCase):
             config_suite = _build_name_pet_config_suite(raw_config)
             self.assertFalse(config_suite.valid)
 
+            self.assertEqual(1, len(config_suite.errors))
+            err = config_suite.errors[0]
+            self.assertIsInstance(err, protoconf.InvalidTypeError)
+            self.assertEqual((), err.key_path)
+
     def test_name_pet_invalid_pet(self):
         for pet in [14, None, [{'name': 'Markus'}], ()]:
             raw_config = { 'name': 'Markus', 'pet': pet }
             config_suite = _build_name_pet_config_suite(raw_config)
             self.assertFalse(config_suite.valid)
+
+            self.assertEqual(1, len(config_suite.errors))
+            err = config_suite.errors[0]
+            self.assertIsInstance(err, protoconf.InvalidTypeError)
+            self.assertEqual(('pet',), err.key_path)

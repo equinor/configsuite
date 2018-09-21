@@ -15,19 +15,21 @@ class Validator(object):
         self._schema = schema
 
     def validate(self, config):
+        self._errors = []
+        self._key_stack = _KeyStack()
         valid = self._validate(config, self._schema)
-        return ValidationResult(valid=valid, errors=())
-
+        return ValidationResult(valid=valid, errors=tuple(self._errors))
 
     def _validate(self, config, schema):
         data_type = schema[MK.Type]
 
         valid = data_type.validate(config)
         if not valid:
-            return valid
+            self._add_invalid_type_error(valid.msg)
+            return bool(valid)
 
-        if data_type.basic:
-           return valid
+        if isinstance(data_type, protoconf.BasicType):
+           return bool(valid)
         elif data_type == protoconf.types.Dict:
             return self._validate_dict(config, schema[MK.Content])
         else:
@@ -43,8 +45,29 @@ class Validator(object):
         if len(missing_keys) > 0:
             return False
 
-        for key in config:
-            if not self._validate(config[key], content_schema[key]):
-                return False
+        valid = True
+        for key in set(config.keys()).union(set(content_schema.keys())):
+            self._key_stack.append(key)
+            valid &= self._validate(config[key], content_schema[key])
+            self._key_stack.pop()
 
-        return True
+        return valid
+
+    def _add_invalid_type_error(self, msg):
+        err = protoconf.InvalidTypeError(msg, self._key_stack.keys())
+        self._errors.append(err)
+
+
+class _KeyStack(object):
+
+    def __init__(self):
+        self._stack = []
+
+    def append(self, key):
+        self._stack.append(key)
+
+    def pop(self):
+        self._stack.pop()
+
+    def keys(self):
+        return tuple(self._stack)
