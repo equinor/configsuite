@@ -37,16 +37,22 @@ class Validator(object):
             raise TypeError(msg.format(data_type))
 
     def _validate_dict(self, config, content_schema):
-        unknown_keys = set(content_schema.keys()) - set(config.keys())
-        if len(unknown_keys) > 0:
-            return False
-
-        missing_keys = set(config.keys()) - set(content_schema.keys())
-        if len(missing_keys) > 0:
-            return False
-
         valid = True
-        for key in set(config.keys()).union(set(content_schema.keys())):
+
+        unknown_keys = set(config.keys()) - set(content_schema.keys())
+        valid &= len(unknown_keys) == 0
+        for key in unknown_keys:
+            msg_fmt = 'Unknown key: {}'
+            self._add_unknown_key_error(msg_fmt.format(key))
+
+        missing_keys = set(content_schema.keys()) - set(config.keys())
+        valid &= len(missing_keys) == 0
+        for key in missing_keys:
+            msg_fmt = 'Missing key: {}'
+            self._add_missing_key_error(msg_fmt.format(key))
+
+        valid_keys = set(config.keys()).intersection(set(content_schema.keys()))
+        for key in valid_keys:
             self._key_stack.append(key)
             valid &= self._validate(config[key], content_schema[key])
             self._key_stack.pop()
@@ -54,7 +60,16 @@ class Validator(object):
         return valid
 
     def _add_invalid_type_error(self, msg):
-        err = protoconf.InvalidTypeError(msg, self._key_stack.keys())
+        self._add_error(msg, protoconf.InvalidTypeError)
+
+    def _add_unknown_key_error(self, msg):
+        self._add_error(msg, protoconf.UnknownKeyError)
+
+    def _add_missing_key_error(self, msg):
+        self._add_error(msg, protoconf.MissingKeyError)
+
+    def _add_error(self, msg, ErrorType):
+        err = ErrorType(msg, self._key_stack.keys())
         self._errors.append(err)
 
 
