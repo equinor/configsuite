@@ -1,5 +1,6 @@
 import enum
 import collections
+import numbers
 
 
 class BooleanResult(object):
@@ -65,6 +66,7 @@ def validator_msg(msg):
 BasicType = collections.namedtuple('Type', ['name', 'validate'])
 Collection = collections.namedtuple('Type', ['name', 'validate'])
 
+
 @validator_msg('Is x a dictionary')
 def _is_dict(x):
     return isinstance(x, dict)
@@ -75,5 +77,23 @@ def _is_string(x):
     return isinstance(x, str)
 
 
+@validator_msg('Is x an integer')
+def _is_integer(x):
+    return isinstance(x, int)
+
+
+@validator_msg('Is x a number')
+def _is_number(x):
+    return isinstance(x, numbers.Number)
+
+
+@validator_msg('Is x a bool')
+def _is_bool(x):
+    return isinstance(x, bool)
+
+
 Dict = Collection('dict', _is_dict)
 String = BasicType('string', _is_string)
+Integer = BasicType('integer', _is_integer)
+Number = BasicType('number', _is_number)
+Bool = BasicType('bool', _is_bool)
