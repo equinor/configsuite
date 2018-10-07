@@ -33,18 +33,21 @@ class ConfigSuite(object):
         return self._snapshot
 
     def _build_snapshot(self, config, schema):
+        if config is None:
+            return None
+
         data_type = schema[protoconf.MetaKeys.Type]
         if isinstance(data_type, protoconf.BasicType):
             return config
         elif data_type == protoconf.types.Dict:
+            content_schema = schema[protoconf.MetaKeys.Content]
             dict_name = data_type.name
-            dict_keys = config.keys()
+            dict_keys = content_schema.keys()
             dict_collection = collections.namedtuple(dict_name, dict_keys)
 
-            child_schema = schema[protoconf.MetaKeys.Content]
             return dict_collection(**{
-                key: self._build_snapshot(config.get(key), child_schema[key])
-                for key in child_schema
+                key: self._build_snapshot(config.get(key), content_schema[key])
+                for key in content_schema
             })
         elif data_type == protoconf.types.List:
             item_schema = schema[protoconf.MetaKeys.Content][protoconf.MetaKeys.Item]
