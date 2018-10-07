@@ -46,6 +46,12 @@ class ConfigSuite(object):
                 key: self._build_snapshot(config.get(key), child_schema[key])
                 for key in child_schema
             })
+        elif data_type == configsuite.types.List:
+            item_schema = schema[configsuite.MetaKeys.Content][configsuite.MetaKeys.Item]
+            return tuple(map(
+                lambda elem: self._build_snapshot(elem, item_schema),
+                config
+            ))
         else:
             msg = 'Encountered unknown type {} while building snapshot'
             raise TypeError(msg.format(str(data_type)))

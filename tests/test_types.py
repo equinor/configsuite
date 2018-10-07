@@ -33,6 +33,22 @@ def _build_name_pet_schema():
                     },
                 },
             },
+            'playgrounds': {
+                MK.Type: types.List,
+                MK.Content: {
+                    MK.Item: {
+                        MK.Type: types.Dict,
+                        MK.Content: {
+                            'name': {
+                                MK.Type: types.String,
+                            },
+                            'score': {
+                                MK.Type: types.Integer,
+                            },
+                        },
+                    },
+                },
+            },
         },
     }
 
@@ -50,6 +66,7 @@ def _build_valid_pet_config():
             'nkids': 8,
             'likeable': True,
         },
+        'playgrounds': [],
     }
 
 
@@ -103,7 +120,8 @@ class TestTypes(unittest.TestCase):
 
     def test_name_pet_invalid_pet(self):
         for pet in [14, None, [{'name': 'Markus'}], ()]:
-            raw_config = { 'name': 'Markus', 'pet': pet }
+            raw_config = _build_valid_pet_config()
+            raw_config['pet'] = pet
             config_suite = _build_name_pet_config_suite(raw_config)
             self.assertFalse(config_suite.valid)
 
@@ -201,3 +219,33 @@ class TestTypes(unittest.TestCase):
                 err = config_suite.errors[0]
                 self.assertIsInstance(err, configsuite.InvalidTypeError)
                 self.assertEqual(('pet', 'likeable'), err.key_path)
+
+    def test_list(self):
+        playgrounds = [
+            { 'name': 'superfun', 'score': 1 },
+            { 'name': 'Hell', 'score': 99 },
+        ]
+
+        for end_idx, _ in enumerate(playgrounds):
+            raw_config = _build_valid_pet_config()
+            raw_config['playgrounds'] = playgrounds[:end_idx]
+            config_suite = _build_name_pet_config_suite(raw_config)
+
+            self.assertTrue(config_suite.valid, 'Errors: %r' % (config_suite.errors,))
+            config = config_suite.snapshot
+            self.assertEqual(end_idx, len(config.playgrounds))
+
+            for idx, plgr in enumerate(playgrounds[:end_idx]):
+                self.assertEqual(plgr['name'], config.playgrounds[idx].name)
+                self.assertEqual(plgr['score'], config.playgrounds[idx].score)
+
+    def test_list_errors(self):
+        raw_config = _build_valid_pet_config()
+        raw_config['playgrounds'] = [{ 'name': 'faulty grounds' }]
+        config_suite = _build_name_pet_config_suite(raw_config)
+
+        self.assertFalse(config_suite.valid)
+        self.assertEqual(1, len(config_suite.errors))
+        err = config_suite.errors[0]
+        self.assertIsInstance(err, configsuite.MissingKeyError)
+        self.assertEqual(('playgrounds', 0), err.key_path)
