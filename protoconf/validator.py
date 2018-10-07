@@ -32,6 +32,8 @@ class Validator(object):
            return bool(valid)
         elif data_type == protoconf.types.Dict:
             return self._validate_dict(config, schema[MK.Content])
+        elif data_type == protoconf.types.List:
+            return self._validate_list(config, schema[MK.Content])
         else:
             msg = 'Unknown type {} while validating'
             raise TypeError(msg.format(data_type))
@@ -55,6 +57,18 @@ class Validator(object):
         for key in valid_keys:
             self._key_stack.append(key)
             valid &= self._validate(config[key], content_schema[key])
+            self._key_stack.pop()
+
+        return valid
+
+    def _validate_list(self, config, schema):
+        assert 1 == len(schema)
+        item_schema = schema[MK.Item]
+
+        valid = True
+        for idx, config_item in enumerate(config):
+            self._key_stack.append(idx)
+            valid &= self._validate(config_item, item_schema)
             self._key_stack.pop()
 
         return valid
