@@ -1,5 +1,7 @@
 import numbers
 import unittest
+
+
 import protoconf
 from protoconf import MetaKeys as MK
 from protoconf import types
@@ -82,7 +84,7 @@ class TestTypes(unittest.TestCase):
                 config.pet.favourite_food,
                 )
 
-    def test_name_pet_invalid_name(self):
+    def test_invalid_string(self):
         for name in [14, None, [], (), {}]:
             raw_config = _build_valid_pet_config()
             raw_config['name'] = name
@@ -103,7 +105,7 @@ class TestTypes(unittest.TestCase):
                     config.pet.favourite_food,
                     )
 
-    def test_name_pet_invalid_base_container(self):
+    def test_invalid_base_dict(self):
         for raw_config in [14, None, [{'name': 'Markus'}], ()]:
             config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
             self.assertFalse(config_suite.valid)
@@ -113,7 +115,7 @@ class TestTypes(unittest.TestCase):
             self.assertIsInstance(err, protoconf.InvalidTypeError)
             self.assertEqual((), err.key_path)
 
-    def test_name_pet_invalid_pet(self):
+    def test_invalid_dict(self):
         for pet in [14, None, [{'name': 'Markus'}], ()]:
             raw_config = _build_valid_pet_config()
             raw_config['pet'] = pet
@@ -124,28 +126,6 @@ class TestTypes(unittest.TestCase):
             err = config_suite.errors[0]
             self.assertIsInstance(err, protoconf.InvalidTypeError)
             self.assertEqual(('pet',), err.key_path)
-
-    def test_unknown_key(self):
-        raw_config = _build_valid_pet_config()
-        raw_config['favourite_food'] = 'bibimpap'
-        config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
-
-        self.assertFalse(config_suite.valid)
-        self.assertEqual(1, len(config_suite.errors))
-        err = config_suite.errors[0]
-        self.assertIsInstance(err, protoconf.UnknownKeyError)
-        self.assertEqual((), err.key_path)
-
-    def test_missing_pet_name(self):
-        raw_config = _build_valid_pet_config()
-        raw_config['pet'].pop('name')
-        config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
-
-        self.assertFalse(config_suite.valid)
-        self.assertEqual(1, len(config_suite.errors))
-        err = config_suite.errors[0]
-        self.assertIsInstance(err, protoconf.MissingKeyError)
-        self.assertEqual(('pet',), err.key_path)
 
     def test_string(self):
         for strval in ['fdnsjk', '', 'str4thewin', True, [], 1, 1.2, {}, None]:
