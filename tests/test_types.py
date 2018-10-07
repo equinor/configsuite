@@ -52,9 +52,6 @@ def _build_name_pet_schema():
     }
 
 
-def _build_name_pet_config_suite(raw_config):
-    return protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
-
 def _build_valid_pet_config():
     return {
         'name': 'Markus',
@@ -73,7 +70,7 @@ class TestTypes(unittest.TestCase):
 
     def test_name_pet_accepted(self):
         raw_config = _build_valid_pet_config()
-        config_suite = _build_name_pet_config_suite(raw_config)
+        config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
 
         self.assertTrue(config_suite.valid)
 
@@ -89,8 +86,7 @@ class TestTypes(unittest.TestCase):
         for name in [14, None, [], (), {}]:
             raw_config = _build_valid_pet_config()
             raw_config['name'] = name
-
-            config_suite = _build_name_pet_config_suite(raw_config)
+            config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
 
             self.assertFalse(config_suite.valid)
 
@@ -109,7 +105,7 @@ class TestTypes(unittest.TestCase):
 
     def test_name_pet_invalid_base_container(self):
         for raw_config in [14, None, [{'name': 'Markus'}], ()]:
-            config_suite = _build_name_pet_config_suite(raw_config)
+            config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
             self.assertFalse(config_suite.valid)
 
             self.assertEqual(1, len(config_suite.errors))
@@ -121,7 +117,7 @@ class TestTypes(unittest.TestCase):
         for pet in [14, None, [{'name': 'Markus'}], ()]:
             raw_config = _build_valid_pet_config()
             raw_config['pet'] = pet
-            config_suite = _build_name_pet_config_suite(raw_config)
+            config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
             self.assertFalse(config_suite.valid)
 
             self.assertEqual(1, len(config_suite.errors))
@@ -132,7 +128,7 @@ class TestTypes(unittest.TestCase):
     def test_unknown_key(self):
         raw_config = _build_valid_pet_config()
         raw_config['favourite_food'] = 'bibimpap'
-        config_suite = _build_name_pet_config_suite(raw_config)
+        config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
 
         self.assertFalse(config_suite.valid)
         self.assertEqual(1, len(config_suite.errors))
@@ -143,7 +139,7 @@ class TestTypes(unittest.TestCase):
     def test_missing_pet_name(self):
         raw_config = _build_valid_pet_config()
         raw_config['pet'].pop('name')
-        config_suite = _build_name_pet_config_suite(raw_config)
+        config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
 
         self.assertFalse(config_suite.valid)
         self.assertEqual(1, len(config_suite.errors))
@@ -155,7 +151,7 @@ class TestTypes(unittest.TestCase):
         for strval in ['fdnsjk', '', 'str4thewin', True, [], 1, 1.2, {}, None]:
             raw_config = _build_valid_pet_config()
             raw_config['name'] = strval
-            config_suite = _build_name_pet_config_suite(raw_config)
+            config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
 
             if isinstance(strval, str):
                 self.assertTrue(config_suite.valid)
@@ -172,7 +168,7 @@ class TestTypes(unittest.TestCase):
         for intval in ['fdnsjk', '', False, 0, -10, [], 1, 1.2, {}, None]:
             raw_config = _build_valid_pet_config()
             raw_config['pet']['nkids'] = intval
-            config_suite = _build_name_pet_config_suite(raw_config)
+            config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
 
             if isinstance(intval, int):
                 self.assertTrue(config_suite.valid)
@@ -189,7 +185,7 @@ class TestTypes(unittest.TestCase):
         for numval in [False, True, 'fdnsjk', '', 0, -10, [], 1, 1.2, {}, None]:
             raw_config = _build_valid_pet_config()
             raw_config['pet']['weight'] = numval
-            config_suite = _build_name_pet_config_suite(raw_config)
+            config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
 
             if isinstance(numval, numbers.Number):
                 self.assertTrue(config_suite.valid)
@@ -206,7 +202,7 @@ class TestTypes(unittest.TestCase):
         for boolval in [False, True, 'fdnsjk', '', 0, -10, [], 1, 1.2, {}, None]:
             raw_config = _build_valid_pet_config()
             raw_config['pet']['likeable'] = boolval
-            config_suite = _build_name_pet_config_suite(raw_config)
+            config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
 
             if isinstance(boolval, bool):
                 self.assertTrue(config_suite.valid)
@@ -228,7 +224,7 @@ class TestTypes(unittest.TestCase):
         for end_idx, _ in enumerate(playgrounds):
             raw_config = _build_valid_pet_config()
             raw_config['playgrounds'] = playgrounds[:end_idx]
-            config_suite = _build_name_pet_config_suite(raw_config)
+            config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
 
             self.assertTrue(config_suite.valid, 'Errors: %r' % (config_suite.errors,))
             config = config_suite.snapshot
@@ -241,7 +237,7 @@ class TestTypes(unittest.TestCase):
     def test_list_errors(self):
         raw_config = _build_valid_pet_config()
         raw_config['playgrounds'] = [{ 'name': 'faulty grounds' }]
-        config_suite = _build_name_pet_config_suite(raw_config)
+        config_suite = protoconf.ConfigSuite(raw_config, _build_name_pet_schema())
 
         self.assertFalse(config_suite.valid)
         self.assertEqual(1, len(config_suite.errors))
