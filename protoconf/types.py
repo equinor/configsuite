@@ -72,6 +72,11 @@ def _is_dict(x):
     return isinstance(x, dict)
 
 
+@validator_msg('Is x a list')
+def _is_list(x):
+    return isinstance(x, list)
+
+
 @validator_msg('Is x a string')
 def _is_string(x):
     return isinstance(x, str)
@@ -93,6 +98,7 @@ def _is_bool(x):
 
 
 Dict = Collection('dict', _is_dict)
+List = Collection('list', _is_list)
 String = BasicType('string', _is_string)
 Integer = BasicType('integer', _is_integer)
 Number = BasicType('number', _is_number)
