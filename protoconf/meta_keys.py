@@ -5,3 +5,4 @@ class MetaKeys(enum.Enum):
     Content = 'content'
     Item = 'item'
     Required = 'required'
+    ElementValidators = 'element_validators'
