@@ -3,9 +3,13 @@ import protoconf
 import collections
 
 
+from .schema import assert_valid_schema
+
+
 class ConfigSuite(object):
 
     def __init__(self, raw_config, schema):
+        assert_valid_schema(schema)
         self._raw_config = copy.deepcopy(raw_config)
         self._schema = copy.deepcopy(schema)
         self._valid = None
