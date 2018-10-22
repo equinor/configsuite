@@ -77,7 +77,7 @@ def _is_dict(x):
 
 @validator_msg('Is x a list')
 def _is_list(x):
-    return isinstance(x, list)
+    return isinstance(x, list) or isinstance(x, tuple)
 
 
 @validator_msg('Is x a string')
@@ -106,3 +106,13 @@ String = BasicType('string', _is_string)
 Integer = BasicType('integer', _is_integer)
 Number = BasicType('number', _is_number)
 Bool = BasicType('bool', _is_bool)
+
+
+# Meta types
+
+@validator_msg('Is x a type')
+def _is_type(x):
+    return isinstance(x, BasicType) or isinstance(x, Collection)
+
+_Type = BasicType('type', _is_type)
+_Callable = BasicType('callable', validator_msg('Is x callable')(callable))
