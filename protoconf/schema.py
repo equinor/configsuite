@@ -1,5 +1,6 @@
 import copy
 import re
+import six
 
 import protoconf
 from protoconf import MetaKeys as MK
@@ -65,7 +66,7 @@ def _assert_valid_schema_level(schema):
 
 
 def _assert_dict_key(key):
-    if not isinstance(key, basestring):
+    if not isinstance(key, six.string_types):
         raise KeyError(
                 'Expected all {} keys to be strings, found: {}'
                 ''.format(types.Dict.name, type(key))
@@ -89,8 +90,11 @@ def _assert_valid_dict_schema(schema):
         err_msg = 'Expected {} to be a dict, was {}'.format(MK.Content, type(content))
         raise ValueError(err_msg)
 
-    map(_assert_dict_key, content.keys())
-    map(assert_valid_schema, content.values())
+    for key in content.keys():
+        _assert_dict_key(key)
+
+    for value in content.values():
+        assert_valid_schema(value)
 
 
 def _assert_valid_list_schema(schema):
