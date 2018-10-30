@@ -26,17 +26,32 @@ class Validator(object):
         valid = data_type.validate(config)
         if not valid:
             self._add_invalid_type_error(valid.msg)
-            return bool(valid)
-
-        if isinstance(data_type, configsuite.BasicType):
-           return bool(valid)
+        elif isinstance(data_type, configsuite.BasicType):
+            pass
         elif data_type == configsuite.types.Dict:
-            return self._validate_dict(config, schema[MK.Content])
+            valid &= self._validate_dict(config, schema[MK.Content])
         elif data_type == configsuite.types.List:
-            return self._validate_list(config, schema[MK.Content])
+            valid &= self._validate_list(config, schema[MK.Content])
         else:
             msg = 'Unknown type {} while validating'
             raise TypeError(msg.format(data_type))
+
+        if valid:
+            valid &= self._element_validation(config, schema)
+
+        return bool(valid)
+
+    def _element_validation(self, config, schema):
+        elem_vals = schema.get(MK.ElementValidators, ())
+
+        valid = True
+        for val in elem_vals:
+            res = val(config)
+            if not res:
+                valid = False
+                self._add_invalid_value_error(res.msg)
+
+        return valid
 
     def _identify_unknown_dict_keys(self, config, content_schema):
         unknown_keys = set(config.keys()) - set(content_schema.keys())
@@ -95,6 +110,9 @@ class Validator(object):
 
     def _add_missing_key_error(self, msg):
         self._add_error(msg, configsuite.MissingKeyError)
+
+    def _add_invalid_value_error(self, msg):
+        self._add_error(msg, configsuite.InvalidValueError)
 
     def _add_error(self, msg, ErrorType):
         err = ErrorType(msg, self._key_stack.keys())

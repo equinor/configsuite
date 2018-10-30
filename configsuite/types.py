@@ -20,6 +20,9 @@ class BooleanResult(object):
     def __bool__(self):
         return self._value is True
 
+    def __and__(self, other):
+        return bool(self) and bool(other)
+
     @property
     def msg(self):
         msg_fmt = '{} is {} on input {}'
