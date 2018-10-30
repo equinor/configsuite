@@ -2,19 +2,28 @@ import unittest
 
 import configsuite
 from configsuite import MetaKeys as MK
+from configsuite import types
 
 
 def _build_name_pet_schema():
     return {
-        MK.Type: configsuite.types.Dict,
+        MK.Type: types.Dict,
         MK.Content: {
             'name': {
-                MK.Type: configsuite.types.String,
+                MK.Type: types.String,
             },
             'pet': {
-                MK.Type: configsuite.types.String,
-            }
-        }
+                MK.Type: types.Dict,
+                MK.Content: {
+                    'name': {
+                        MK.Type: types.String,
+                    },
+                    'favourite_food': {
+                        MK.Type: types.String,
+                    },
+                },
+            },
+        },
     }
 
 
@@ -27,7 +36,10 @@ class TestTypes(unittest.TestCase):
     def test_name_pet_accepted(self):
         raw_config = {
             'name': 'Markus',
-            'pet': 'Donkey Kong',
+            'pet': {
+                'name': 'Donkey Kong',
+                'favourite_food': 'bananas',
+            },
         }
         config_suite = _build_name_pet_config_suite(raw_config)
 
@@ -35,13 +47,20 @@ class TestTypes(unittest.TestCase):
 
         config = config_suite.snapshot
         self.assertEqual(raw_config['name'], config.name)
-        self.assertEqual(raw_config['pet'], config.pet)
+        self.assertEqual(raw_config['pet']['name'], config.pet.name)
+        self.assertEqual(
+                raw_config['pet']['favourite_food'],
+                config.pet.favourite_food,
+                )
 
-    def test_name_pet_invalid_pet(self):
-        for pet in [14, None, [], (), {}]:
+    def test_name_pet_invalid_name(self):
+        for name in [14, None, [], (), {}]:
             raw_config = {
-                'name': 'Markus',
-                'pet': pet,
+                'name': name,
+                'pet': {
+                    'name': 'Donkey Kong',
+                    'favourite_food': 'bananas',
+                },
             }
             config_suite = _build_name_pet_config_suite(raw_config)
 
@@ -49,9 +68,19 @@ class TestTypes(unittest.TestCase):
 
             config = config_suite.snapshot
             self.assertEqual(raw_config['name'], config.name)
-            self.assertEqual(raw_config['pet'], config.pet)
+            self.assertEqual(raw_config['pet']['name'], config.pet.name)
+            self.assertEqual(
+                    raw_config['pet']['favourite_food'],
+                    config.pet.favourite_food,
+                    )
 
-    def test_name_pet_invalid_container(self):
+    def test_name_pet_invalid_base_container(self):
         for raw_config in [14, None, [{'name': 'Markus'}], ()]:
+            config_suite = _build_name_pet_config_suite(raw_config)
+            self.assertFalse(config_suite.valid)
+
+    def test_name_pet_invalid_pet(self):
+        for pet in [14, None, [{'name': 'Markus'}], ()]:
+            raw_config = { 'name': 'Markus', 'pet': pet }
             config_suite = _build_name_pet_config_suite(raw_config)
             self.assertFalse(config_suite.valid)
