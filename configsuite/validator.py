@@ -38,20 +38,34 @@ class Validator(object):
             msg = 'Unknown type {} while validating'
             raise TypeError(msg.format(data_type))
 
-    def _validate_dict(self, config, content_schema):
-        valid = True
-
+    def _identify_unknown_dict_keys(self, config, content_schema):
         unknown_keys = set(config.keys()) - set(content_schema.keys())
-        valid &= len(unknown_keys) == 0
         for key in unknown_keys:
             msg_fmt = 'Unknown key: {}'
             self._add_unknown_key_error(msg_fmt.format(key))
+        return len(unknown_keys) == 0
 
-        missing_keys = set(content_schema.keys()) - set(config.keys())
-        valid &= len(missing_keys) == 0
+    def _identify_missing_dict_keys(self, config, content_schema):
+        optional_keys = [
+            key
+            for key in content_schema
+            if not content_schema[key].get(MK.Required, True)
+        ]
+        missing_keys = (
+            set(content_schema.keys())
+            - set(config.keys())
+            - set(optional_keys)
+        )
+
         for key in missing_keys:
             msg_fmt = 'Missing key: {}'
             self._add_missing_key_error(msg_fmt.format(key))
+        return len(missing_keys) == 0
+
+    def _validate_dict(self, config, content_schema):
+        valid = True
+        valid &= self._identify_unknown_dict_keys(config, content_schema)
+        valid &= self._identify_missing_dict_keys(config, content_schema)
 
         valid_keys = set(config.keys()).intersection(set(content_schema.keys()))
         for key in valid_keys:
