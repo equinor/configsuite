@@ -9,16 +9,18 @@ class ConfigSuite(object):
         self._raw_config = copy.deepcopy(raw_config)
         self._schema = copy.deepcopy(schema)
         self._valid = None
+        self._errors = None
         self._snapshot = None
 
     @property
     def valid(self):
-        if self._valid is None:
-            validator = configsuite.Validator(self._schema)
-            val_res = validator.validate(self._raw_config)
-            self._valid = val_res.valid
-
+        self._ensure_validation()
         return self._valid
+
+    @property
+    def errors(self):
+        self._ensure_validation()
+        return self._errors
 
     @property
     def snapshot(self):
@@ -32,7 +34,7 @@ class ConfigSuite(object):
 
     def _build_snapshot(self, config, schema):
         data_type = schema[configsuite.MetaKeys.Type]
-        if data_type.basic:
+        if isinstance(data_type, configsuite.BasicType):
             return config
         elif data_type == configsuite.types.Dict:
             dict_name = data_type.name
@@ -47,3 +49,10 @@ class ConfigSuite(object):
         else:
             msg = 'Encountered unknown type {} while building snapshot'
             raise TypeError(msg.format(str(data_type)))
+
+    def _ensure_validation(self):
+        if self._valid is None:
+            validator = configsuite.Validator(self._schema)
+            val_res = validator.validate(self._raw_config)
+            self._valid = val_res.valid
+            self._errors = val_res.errors
