@@ -28,13 +28,13 @@ from configsuite import types
 
 def _build_name_pet_schema():
     return {
-        MK.Type: types.Dict,
+        MK.Type: types.NamedDict,
         MK.Content: {
             'name': {
                 MK.Type: types.String,
             },
             'pet': {
-                MK.Type: types.Dict,
+                MK.Type: types.NamedDict,
                 MK.Content: {
                     'name': {
                         MK.Type: types.String,
@@ -57,7 +57,7 @@ def _build_name_pet_schema():
                 MK.Type: types.List,
                 MK.Content: {
                     MK.Item: {
-                        MK.Type: types.Dict,
+                        MK.Type: types.NamedDict,
                         MK.Content: {
                             'name': {
                                 MK.Type: types.String,

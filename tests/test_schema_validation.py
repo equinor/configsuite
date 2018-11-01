@@ -33,7 +33,7 @@ def _build_candybag_schema():
     return {
         MK.Type: types.List,
         MK.Content: {
-            MK.Item: { MK.Type: types.Dict,
+            MK.Item: { MK.Type: types.NamedDict,
                 MK.Content: {
                     'color': { MK.Type: types.String },
                     'name': {

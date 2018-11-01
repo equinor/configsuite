@@ -18,7 +18,7 @@ in all copies or substantial portions of the Software.
 
 
 from .meta_keys import MetaKeys
-from .types import BasicType, Collection, String, Dict, validator_msg
+from .types import BasicType, Collection, String, NamedDict, validator_msg
 from .validation_errors import (
         ValidationErrorNames, InvalidTypeError,
         MissingKeyError, UnknownKeyError,

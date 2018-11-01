@@ -90,7 +90,7 @@ Collection = collections.namedtuple('Type', ['name', 'validate'])
 
 
 @validator_msg('Is x a dictionary')
-def _is_dict(x):
+def _is_named_dict(x):
     return isinstance(x, dict)
 
 
@@ -119,7 +119,7 @@ def _is_bool(x):
     return isinstance(x, bool)
 
 
-Dict = Collection('dict', _is_dict)
+NamedDict = Collection('named_dict', _is_named_dict)
 List = Collection('list', _is_list)
 String = BasicType('string', _is_string)
 Integer = BasicType('integer', _is_integer)

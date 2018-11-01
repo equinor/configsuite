@@ -27,7 +27,7 @@ from .types import _Type, _Callable
 
 
 _META_SCHEMA = {
-    MK.Type: types.Dict,
+    MK.Type: types.NamedDict,
     MK.Content: {
         MK.Type: { MK.Type: _Type },
         MK.Required: { MK.Type: types.Bool, MK.Required: False },
@@ -48,7 +48,7 @@ def assert_valid_schema(schema):
     level_type = schema[MK.Type]
     if isinstance(level_type, types.BasicType):
         return
-    elif level_type == types.Dict:
+    elif level_type == types.NamedDict:
         _assert_valid_dict_schema(schema)
     elif level_type == types.List:
         _assert_valid_list_schema(schema)
@@ -87,20 +87,20 @@ def _assert_dict_key(key):
     if not isinstance(key, six.string_types):
         raise KeyError(
                 'Expected all {} keys to be strings, found: {}'
-                ''.format(types.Dict.name, type(key))
+                ''.format(types.NamedDict.name, type(key))
                 )
 
     key_regex = '^[a-zA-Z_][a-zA-Z0-9_]*$'
     if not re.match(key_regex, key):
         raise KeyError(
                 'Expected all {} keys to match: "{}", found: {}'
-                ''.format(types.Dict.name, key_regex, key)
+                ''.format(types.NamedDict.name, key_regex, key)
                 )
 
 
 def _assert_valid_dict_schema(schema):
     if MK.Content not in schema:
-        err_msg = '{} schema has no {}: {}'.format(types.Dict.name, MK.Content, schema)
+        err_msg = '{} schema has no {}: {}'.format(types.NamedDict.name, MK.Content, schema)
         raise KeyError(err_msg)
 
     content = schema[MK.Content]
