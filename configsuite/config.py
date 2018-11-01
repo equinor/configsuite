@@ -62,7 +62,7 @@ class ConfigSuite(object):
         data_type = schema[configsuite.MetaKeys.Type]
         if isinstance(data_type, configsuite.BasicType):
             return config
-        elif data_type == configsuite.types.Dict:
+        elif data_type == configsuite.types.NamedDict:
             content_schema = schema[configsuite.MetaKeys.Content]
             dict_name = data_type.name
             dict_keys = content_schema.keys()

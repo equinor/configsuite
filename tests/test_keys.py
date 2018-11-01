@@ -27,7 +27,7 @@ from configsuite import types
 
 def _build_candidate_schema():
     return {
-        MK.Type: types.Dict,
+        MK.Type: types.NamedDict,
         MK.Content: {
             'name': {
                 MK.Type: types.String,
@@ -37,7 +37,7 @@ def _build_candidate_schema():
                 MK.Required: False,
             },
             'current_job': {
-                MK.Type: types.Dict,
+                MK.Type: types.NamedDict,
                 MK.Required: False,
                 MK.Content: {
                     'company_name': {

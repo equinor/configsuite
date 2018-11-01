@@ -47,7 +47,7 @@ class Validator(object):
             self._add_invalid_type_error(valid.msg)
         elif isinstance(data_type, configsuite.BasicType):
             pass
-        elif data_type == configsuite.types.Dict:
+        elif data_type == configsuite.types.NamedDict:
             valid &= self._validate_dict(config, schema[MK.Content])
         elif data_type == configsuite.types.List:
             valid &= self._validate_list(config, schema[MK.Content])
