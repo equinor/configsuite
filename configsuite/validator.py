@@ -48,9 +48,11 @@ class Validator(object):
         elif isinstance(data_type, configsuite.BasicType):
             pass
         elif data_type == configsuite.types.NamedDict:
-            valid &= self._validate_dict(config, schema[MK.Content])
+            valid &= self._validate_named_dict(config, schema[MK.Content])
         elif data_type == configsuite.types.List:
             valid &= self._validate_list(config, schema[MK.Content])
+        elif data_type == configsuite.types.Dict:
+            valid &= self._validate_dict(config, schema[MK.Content])
         else:
             msg = 'Unknown type {} while validating'
             raise TypeError(msg.format(data_type))
@@ -96,7 +98,7 @@ class Validator(object):
             self._add_missing_key_error(msg_fmt.format(key))
         return len(missing_keys) == 0
 
-    def _validate_dict(self, config, content_schema):
+    def _validate_named_dict(self, config, content_schema):
         valid = True
         valid &= self._identify_unknown_dict_keys(config, content_schema)
         valid &= self._identify_missing_dict_keys(config, content_schema)
@@ -110,13 +112,25 @@ class Validator(object):
         return valid
 
     def _validate_list(self, config, schema):
-        assert 1 == len(schema)
         item_schema = schema[MK.Item]
 
         valid = True
         for idx, config_item in enumerate(config):
             self._key_stack.append(idx)
             valid &= self._validate(config_item, item_schema)
+            self._key_stack.pop()
+
+        return valid
+
+    def _validate_dict(self, config, content_schema):
+        key_schema = content_schema[MK.Key]
+        value_schema = content_schema[MK.Value]
+
+        valid = True
+        for key, value in config.items():
+            self._key_stack.append(key)
+            valid &= self._validate(key, key_schema)
+            valid &= self._validate(value, value_schema)
             self._key_stack.pop()
 
         return valid

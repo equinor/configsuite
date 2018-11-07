@@ -23,6 +23,7 @@ import collections
 
 
 from .schema import assert_valid_schema
+from .meta_keys import MetaKeys as MK
 
 
 class ConfigSuite(object):
@@ -59,11 +60,11 @@ class ConfigSuite(object):
         if config is None:
             return None
 
-        data_type = schema[configsuite.MetaKeys.Type]
+        data_type = schema[MK.Type]
         if isinstance(data_type, configsuite.BasicType):
             return config
         elif data_type == configsuite.types.NamedDict:
-            content_schema = schema[configsuite.MetaKeys.Content]
+            content_schema = schema[MK.Content]
             dict_name = data_type.name
             dict_keys = content_schema.keys()
             dict_collection = collections.namedtuple(dict_name, dict_keys)
@@ -73,11 +74,23 @@ class ConfigSuite(object):
                 for key in content_schema
             })
         elif data_type == configsuite.types.List:
-            item_schema = schema[configsuite.MetaKeys.Content][configsuite.MetaKeys.Item]
+            item_schema = schema[MK.Content][MK.Item]
             return tuple(map(
                 lambda elem: self._build_snapshot(elem, item_schema),
                 config
             ))
+        elif data_type == configsuite.types.Dict:
+            key_schema = schema[MK.Content][MK.Key]
+            value_schema = schema[MK.Content][MK.Value]
+
+            Pair = collections.namedtuple('KeyValuePair', ['key', 'value'])
+            return tuple([
+                Pair(
+                    self._build_snapshot(key, key_schema),
+                    self._build_snapshot(value, value_schema)
+                )
+                for key, value in config.items()
+            ])
         else:
             msg = 'Encountered unknown type {} while building snapshot'
             raise TypeError(msg.format(str(data_type)))

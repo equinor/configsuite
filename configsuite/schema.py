@@ -49,9 +49,11 @@ def assert_valid_schema(schema):
     if isinstance(level_type, types.BasicType):
         return
     elif level_type == types.NamedDict:
-        _assert_valid_dict_schema(schema)
+        _assert_valid_named_dict_schema(schema)
     elif level_type == types.List:
         _assert_valid_list_schema(schema)
+    elif level_type == types.Dict:
+        _assert_valid_dict_schema(schema)
     else:
         raise AssertionError('Unknown base container: {}'.format(schema))
 
@@ -98,7 +100,7 @@ def _assert_dict_key(key):
                 )
 
 
-def _assert_valid_dict_schema(schema):
+def _assert_valid_named_dict_schema(schema):
     if MK.Content not in schema:
         err_msg = '{} schema has no {}: {}'.format(types.NamedDict.name, MK.Content, schema)
         raise KeyError(err_msg)
@@ -127,10 +129,33 @@ def _assert_valid_list_schema(schema):
 
     if tuple(content.keys()) != (MK.Item,):
         err_msg = (
-                'Expected {} of a {} to contain exactly on key. '
+                'Expected {} of a {} to contain exactly one key. '
                 ', namely {}, was {}.'
                 ''.format(MK.Content, types.List.name, MK.Item, content.keys())
                 )
         raise KeyError(err_msg)
 
     assert_valid_schema(content[MK.Item])
+
+
+def _assert_valid_dict_schema(schema):
+    if MK.Content not in schema:
+        err_msg = '{} schema has no {}: {}'.format(types.Dict.name, MK.Content, schema)
+        raise KeyError(err_msg)
+
+    content = schema[MK.Content]
+    if not isinstance(content, dict):
+        err_msg = 'Expected {} to be a dict, was {}'.format(MK.Content, type(content))
+        raise ValueError(err_msg)
+
+    expected_keys = (MK.Key, MK.Value)
+    if (len(content.keys()) != len(expected_keys)
+        or set(content.keys()) != set(expected_keys)):
+        err_msg = (
+                'Expected {} of a {} to contain the keys {}, was {}.'
+                ''.format(MK.Content, types.Dict.name, (MK.Key, MK.Value), content.keys())
+                )
+        raise KeyError(err_msg)
+
+    assert_valid_schema(content[MK.Key])
+    assert_valid_schema(content[MK.Value])
