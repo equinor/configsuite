@@ -24,8 +24,15 @@ setuptools.setup(
     name='configsuite',
     packages=['configsuite'],
     author='Software Innovation Bergen, Statoil ASA and TNO',
+    use_scm_version={
+        'write_to': 'configsuite/_version.py'
+    },
     install_requires=['decorator', 'enum34'],
-    setup_requires=['pytest-runner'],
+    setup_requires=[
+        'pytest-runner',
+        'setuptools_scm',
+        'setuptools_scm_about'
+    ],
     tests_require=['pytest'],
     test_suite='tests',
 )
