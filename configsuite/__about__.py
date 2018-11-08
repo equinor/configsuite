@@ -17,18 +17,4 @@ in all copies or substantial portions of the Software.
 """
 
 
-try:
-    from ._version import version as __version__
-except ImportError:
-    from .__about__ import __version__
-
-
-from .meta_keys import MetaKeys
-from .types import BasicType, Collection, String, NamedDict, validator_msg
-from .validation_errors import (
-        ValidationErrorNames, InvalidTypeError,
-        MissingKeyError, UnknownKeyError,
-        InvalidValueError,
-        )
-from .validator import Validator
-from .config import ConfigSuite
+__version__ = '0.0.0'

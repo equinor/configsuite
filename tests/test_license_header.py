@@ -57,10 +57,17 @@ in all copies or substantial portions of the Software.
             for path, _, filenames in os.walk(sdir):
                 source_files += [ os.path.join(path, fn) for fn in filenames ]
 
+        def is_source_file(filename):
+            return (
+                os.path.splitext(filename)[1] not in ignore_extensions
+                and os.path.basename(filename) != '_version.py'
+            )
+
         self.source_files = filter(
-                lambda fn: os.path.splitext(fn)[1] not in ignore_extensions,
+                is_source_file,
                 map(os.path.realpath, source_files)
                 )
+
 
     def test_license_headers(self):
         header_length = self.header.count('\n')
