@@ -26,7 +26,7 @@ from configsuite import MetaKeys as MK
 from configsuite import types
 
 
-@configsuite.validator_msg('Price should be non-negative')
+@configsuite.validator_msg("Price should be non-negative")
 def _non_negative_price(elem):
     return elem > 0
 
@@ -35,49 +35,40 @@ def _build_store_schema():
     return {
         MK.Type: types.NamedDict,
         MK.Content: {
-            'employees': {
+            "employees": {
                 MK.Type: types.Dict,
                 MK.Content: {
-                    MK.Key: { MK.Type: types.String },
+                    MK.Key: {MK.Type: types.String},
                     MK.Value: {
                         MK.Type: types.NamedDict,
                         MK.Content: {
-                            'salary': { MK.Type: types.Number },
-                            'shift_leader': { MK.Type: types.String },
+                            "salary": {MK.Type: types.Number},
+                            "shift_leader": {MK.Type: types.String},
                         },
                     },
                 },
             },
-            'prices': {
+            "prices": {
                 MK.Type: types.Dict,
                 MK.Content: {
-                    MK.Key: { MK.Type: types.String },
+                    MK.Key: {MK.Type: types.String},
                     MK.Value: {
                         MK.Type: types.Number,
                         MK.ElementValidators: (_non_negative_price,),
-                        },
+                    },
                 },
-            }
+            },
         },
     }
 
 
 def _build_valid_store_config():
     return {
-        'employees': {
-            'Are': {
-                'salary': 4,
-                'shift_leader': 'Jonny',
-            },
-            'Knut': {
-                'salary': 1,
-                'shift_leader': 'Are',
-            }
+        "employees": {
+            "Are": {"salary": 4, "shift_leader": "Jonny"},
+            "Knut": {"salary": 1, "shift_leader": "Are"},
         },
-        'prices': {
-            'flour': 2.3,
-            'pig': 10,
-        },
+        "prices": {"flour": 2.3, "pig": 10},
     }
 
 
@@ -85,78 +76,66 @@ def _build_advanced_store_schema():
     return {
         MK.Type: types.NamedDict,
         MK.Content: {
-            'employees': {
+            "employees": {
                 MK.Type: types.Dict,
                 MK.Content: {
-                    MK.Key: { MK.Type: types.String },
+                    MK.Key: {MK.Type: types.String},
                     MK.Value: {
                         MK.Type: types.NamedDict,
                         MK.Content: {
-                            'salary': { MK.Type: types.Number },
-                            'shift_leader': { MK.Type: types.String },
+                            "salary": {MK.Type: types.Number},
+                            "shift_leader": {MK.Type: types.String},
                         },
                     },
                 },
             },
-            'prices': {
+            "prices": {
                 MK.Type: types.Dict,
                 MK.Content: {
-                    MK.Key: { MK.Type: types.String },
+                    MK.Key: {MK.Type: types.String},
                     MK.Value: {
                         MK.Type: types.NamedDict,
                         MK.Content: {
-                            'kilo': { MK.Type: types.Number },
-                            'gram': { MK.Type: types.Number },
-                            'unit': { MK.Type: types.Number, MK.Required: False },
-                        }
+                            "kilo": {MK.Type: types.Number},
+                            "gram": {MK.Type: types.Number},
+                            "unit": {MK.Type: types.Number, MK.Required: False},
+                        },
                     },
                 },
-            }
+            },
         },
     }
 
 
 def _build_valid_advanced_store_config():
     return {
-        'employees': {
-            'Are': {
-                'salary': 4,
-                'shift_leader': 'Jonny',
-            },
-            'Knut': {
-                'salary': 1,
-                'shift_leader': 'Are',
-            }
+        "employees": {
+            "Are": {"salary": 4, "shift_leader": "Jonny"},
+            "Knut": {"salary": 1, "shift_leader": "Are"},
         },
-        'prices': {
-            'flour': { 'kilo': 4.5, 'gram': 30 },
-            'pig': { 'unit': 100, 'kilo': 20, 'gram': 3 },
+        "prices": {
+            "flour": {"kilo": 4.5, "gram": 30},
+            "pig": {"unit": 100, "kilo": 20, "gram": 3},
         },
     }
 
 
-
 class TestDict(unittest.TestCase):
-
     def test_valid_store_config(self):
         raw_config = _build_valid_store_config()
         store_schema = _build_store_schema()
         config_suite = configsuite.ConfigSuite(raw_config, store_schema)
 
         self.assertTrue(config_suite.valid)
-        prices = [
-            (elem.key, elem.value)
-            for elem in config_suite.snapshot.prices
-        ]
+        prices = [(elem.key, elem.value) for elem in config_suite.snapshot.prices]
         self.assertEqual(
-                sorted(tuple(raw_config['prices'].items())),
-                sorted(tuple(prices))
-                )
+            sorted(tuple(raw_config["prices"].items())), sorted(tuple(prices))
+        )
 
     def test_invalid_schema_no_key(self):
         raw_config = _build_valid_store_config()
         store_schema = _build_store_schema()
-        store_schema[MK.Content]['prices'][MK.Content].pop(MK.Key)
+        store_schema[MK.Content]["prices"][MK.Content].pop(MK.Key)
 
         with self.assertRaises(KeyError):
             config_suite = configsuite.ConfigSuite(raw_config, store_schema)
@@ -164,7 +143,7 @@ class TestDict(unittest.TestCase):
     def test_invalid_schema_no_value(self):
         raw_config = _build_valid_store_config()
         store_schema = _build_store_schema()
-        store_schema[MK.Content]['prices'][MK.Content].pop(MK.Value)
+        store_schema[MK.Content]["prices"][MK.Content].pop(MK.Value)
 
         with self.assertRaises(KeyError):
             config_suite = configsuite.ConfigSuite(raw_config, store_schema)
@@ -172,14 +151,14 @@ class TestDict(unittest.TestCase):
     def test_invalid_schema_extra_spec(self):
         raw_config = _build_valid_store_config()
         store_schema = _build_store_schema()
-        store_schema[MK.Content]['prices'][MK.Content]['monkey'] = 'patch'
+        store_schema[MK.Content]["prices"][MK.Content]["monkey"] = "patch"
 
         with self.assertRaises(KeyError):
             config_suite = configsuite.ConfigSuite(raw_config, store_schema)
 
     def test_valid_store_config_faulty_key(self):
         raw_config = _build_valid_store_config()
-        raw_config['prices'][123] = 1
+        raw_config["prices"][123] = 1
         store_schema = _build_store_schema()
         config_suite = configsuite.ConfigSuite(raw_config, store_schema)
 
@@ -190,7 +169,7 @@ class TestDict(unittest.TestCase):
 
     def test_valid_store_config_faulty_value(self):
         raw_config = _build_valid_store_config()
-        raw_config['prices']['pig'] = 'very expensive'
+        raw_config["prices"]["pig"] = "very expensive"
         store_schema = _build_store_schema()
         config_suite = configsuite.ConfigSuite(raw_config, store_schema)
 
@@ -207,23 +186,20 @@ class TestDict(unittest.TestCase):
         self.assertTrue(config_suite.valid)
         # Map all not listed values to None
         raw_prices = [
-            (
-                key,
-                {
-                    key: value.get(key)
-                    for key in ('unit', 'kilo', 'gram') 
-                }
-            )
-            for (key, value) in raw_config['prices'].items()
+            (key, {key: value.get(key) for key in ("unit", "kilo", "gram")})
+            for (key, value) in raw_config["prices"].items()
         ]
 
         # Extract and format prices from config
         prices = [
-            (elem.key, {
-                'unit': elem.value.unit,
-                'kilo': elem.value.kilo,
-                'gram': elem.value.gram,
-            })
+            (
+                elem.key,
+                {
+                    "unit": elem.value.unit,
+                    "kilo": elem.value.kilo,
+                    "gram": elem.value.gram,
+                },
+            )
             for elem in config_suite.snapshot.prices
         ]
         self.assertEqual(raw_prices, prices)
@@ -231,7 +207,9 @@ class TestDict(unittest.TestCase):
     def test_advanced_store_config_faulty_schema(self):
         raw_config = _build_valid_advanced_store_config()
         store_schema = _build_advanced_store_schema()
-        store_schema[MK.Content]['prices'][MK.Content][MK.Value][MK.Content]['kilo'].pop(MK.Type)
+        store_schema[MK.Content]["prices"][MK.Content][MK.Value][MK.Content][
+            "kilo"
+        ].pop(MK.Type)
 
         with self.assertRaises(KeyError):
             config_suite = configsuite.ConfigSuite(raw_config, store_schema)

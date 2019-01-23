@@ -22,14 +22,10 @@ import configsuite
 from configsuite import MetaKeys as MK
 
 
-ValidationResult = collections.namedtuple(
-    'ValidationResult',
-    ('valid', 'errors')
-)
+ValidationResult = collections.namedtuple("ValidationResult", ("valid", "errors"))
 
 
 class Validator(object):
-
     def __init__(self, schema):
         self._schema = schema
 
@@ -54,7 +50,7 @@ class Validator(object):
         elif data_type == configsuite.types.Dict:
             valid &= self._validate_dict(config, schema[MK.Content])
         else:
-            msg = 'Unknown type {} while validating'
+            msg = "Unknown type {} while validating"
             raise TypeError(msg.format(data_type))
 
         if valid:
@@ -77,7 +73,7 @@ class Validator(object):
     def _identify_unknown_dict_keys(self, config, content_schema):
         unknown_keys = set(config.keys()) - set(content_schema.keys())
         for key in unknown_keys:
-            msg_fmt = 'Unknown key: {}'
+            msg_fmt = "Unknown key: {}"
             self._add_unknown_key_error(msg_fmt.format(key))
         return len(unknown_keys) == 0
 
@@ -88,13 +84,11 @@ class Validator(object):
             if not content_schema[key].get(MK.Required, True)
         ]
         missing_keys = (
-            set(content_schema.keys())
-            - set(config.keys())
-            - set(optional_keys)
+            set(content_schema.keys()) - set(config.keys()) - set(optional_keys)
         )
 
         for key in missing_keys:
-            msg_fmt = 'Missing key: {}'
+            msg_fmt = "Missing key: {}"
             self._add_missing_key_error(msg_fmt.format(key))
         return len(missing_keys) == 0
 
@@ -153,7 +147,6 @@ class Validator(object):
 
 
 class _KeyStack(object):
-
     def __init__(self):
         self._stack = []
 

@@ -27,7 +27,6 @@ from .meta_keys import MetaKeys as MK
 
 
 class ConfigSuite(object):
-
     def __init__(self, raw_config, schema):
         assert_valid_schema(schema)
         self._raw_config = copy.deepcopy(raw_config)
@@ -49,10 +48,7 @@ class ConfigSuite(object):
     @property
     def snapshot(self):
         if self._snapshot is None:
-            self._snapshot = self._build_snapshot(
-                    self._raw_config,
-                    self._schema,
-                    )
+            self._snapshot = self._build_snapshot(self._raw_config, self._schema)
 
         return self._snapshot
 
@@ -69,30 +65,33 @@ class ConfigSuite(object):
             dict_keys = content_schema.keys()
             dict_collection = collections.namedtuple(dict_name, dict_keys)
 
-            return dict_collection(**{
-                key: self._build_snapshot(config.get(key), content_schema[key])
-                for key in content_schema
-            })
+            return dict_collection(
+                **{
+                    key: self._build_snapshot(config.get(key), content_schema[key])
+                    for key in content_schema
+                }
+            )
         elif data_type == configsuite.types.List:
             item_schema = schema[MK.Content][MK.Item]
-            return tuple(map(
-                lambda elem: self._build_snapshot(elem, item_schema),
-                config
-            ))
+            return tuple(
+                map(lambda elem: self._build_snapshot(elem, item_schema), config)
+            )
         elif data_type == configsuite.types.Dict:
             key_schema = schema[MK.Content][MK.Key]
             value_schema = schema[MK.Content][MK.Value]
 
-            Pair = collections.namedtuple('KeyValuePair', ['key', 'value'])
-            return tuple([
-                Pair(
-                    self._build_snapshot(key, key_schema),
-                    self._build_snapshot(value, value_schema)
-                )
-                for key, value in config.items()
-            ])
+            Pair = collections.namedtuple("KeyValuePair", ["key", "value"])
+            return tuple(
+                [
+                    Pair(
+                        self._build_snapshot(key, key_schema),
+                        self._build_snapshot(value, value_schema),
+                    )
+                    for key, value in config.items()
+                ]
+            )
         else:
-            msg = 'Encountered unknown type {} while building snapshot'
+            msg = "Encountered unknown type {} while building snapshot"
             raise TypeError(msg.format(str(data_type)))
 
     def _ensure_validation(self):

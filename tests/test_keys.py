@@ -29,43 +29,32 @@ def _build_candidate_schema():
     return {
         MK.Type: types.NamedDict,
         MK.Content: {
-            'name': {
-                MK.Type: types.String,
-            },
-            'weight': {
-                MK.Type: types.Number,
-                MK.Required: False,
-            },
-            'current_job': {
+            "name": {MK.Type: types.String},
+            "weight": {MK.Type: types.Number, MK.Required: False},
+            "current_job": {
                 MK.Type: types.NamedDict,
                 MK.Required: False,
                 MK.Content: {
-                    'company_name': {
-                        MK.Type: types.String,
-                    },
-                    'position': {
-                        MK.Type: types.String,
-                        MK.Required: False,
-                    },
+                    "company_name": {MK.Type: types.String},
+                    "position": {MK.Type: types.String, MK.Required: False},
                 },
             },
-        }
+        },
     }
 
 
 def _build_valid_candidate_config():
     return {
-        'name': 'Atle Jonny',
-        'weight': 100,
-        'current_job': {
-            'company_name': 'Super Traktor',
-            'position': 'Assisting director of the printer room',
+        "name": "Atle Jonny",
+        "weight": 100,
+        "current_job": {
+            "company_name": "Super Traktor",
+            "position": "Assisting director of the printer room",
         },
     }
 
 
 class TestKeys(unittest.TestCase):
-
     def test_plain_candidate_config(self):
         raw_config = _build_valid_candidate_config()
         config_suite = configsuite.ConfigSuite(raw_config, _build_candidate_schema())
@@ -73,7 +62,7 @@ class TestKeys(unittest.TestCase):
 
     def test_unknown_key(self):
         raw_config = _build_valid_candidate_config()
-        raw_config['favourite_food'] = 'bibimpap'
+        raw_config["favourite_food"] = "bibimpap"
         config_suite = configsuite.ConfigSuite(raw_config, _build_candidate_schema())
 
         self.assertFalse(config_suite.valid)
@@ -84,7 +73,7 @@ class TestKeys(unittest.TestCase):
 
     def test_missing_key(self):
         raw_config = _build_valid_candidate_config()
-        raw_config.pop('name')
+        raw_config.pop("name")
         config_suite = configsuite.ConfigSuite(raw_config, _build_candidate_schema())
 
         self.assertFalse(config_suite.valid)
@@ -95,7 +84,7 @@ class TestKeys(unittest.TestCase):
 
     def test_not_required(self):
         raw_config = _build_valid_candidate_config()
-        raw_config.pop('weight')
+        raw_config.pop("weight")
         config_suite = configsuite.ConfigSuite(raw_config, _build_candidate_schema())
 
         self.assertTrue(config_suite.valid)
@@ -103,18 +92,18 @@ class TestKeys(unittest.TestCase):
 
     def test_required_if_parent(self):
         raw_config = _build_valid_candidate_config()
-        raw_config['current_job'].pop('company_name')
+        raw_config["current_job"].pop("company_name")
         config_suite = configsuite.ConfigSuite(raw_config, _build_candidate_schema())
 
         self.assertFalse(config_suite.valid)
         self.assertEqual(1, len(config_suite.errors))
         err = config_suite.errors[0]
         self.assertIsInstance(err, configsuite.MissingKeyError)
-        self.assertEqual(('current_job',), err.key_path)
+        self.assertEqual(("current_job",), err.key_path)
 
     def test_optional_child_of_optional(self):
         raw_config = _build_valid_candidate_config()
-        raw_config['current_job'].pop('position')
+        raw_config["current_job"].pop("position")
         config_suite = configsuite.ConfigSuite(raw_config, _build_candidate_schema())
 
         self.assertTrue(config_suite.valid)
