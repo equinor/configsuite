@@ -44,19 +44,15 @@ class BooleanResult(object):
 
     @property
     def msg(self):
-        msg_fmt = '{} is {} on input {}'
-        return msg_fmt.format(
-                self._msg,
-                'true' if self else 'false',
-                self._input,
-                )
+        msg_fmt = "{} is {} on input {}"
+        return msg_fmt.format(self._msg, "true" if self else "false", self._input)
 
     @property
     def raw_msg(self):
         return self._msg
 
     def __repr__(self):
-        fmt = 'BooleanResult({}, {}, {})'
+        fmt = "BooleanResult({}, {}, {})"
         return fmt.format(bool(self), self._msg, self._input)
 
 
@@ -77,62 +73,67 @@ def validator_msg(msg):
     instance if provided with [0, 1], we will have
         `ret.msg = 'assert len(x) <= 2 is true on input [0, 1]`.
     """
+
     def real_decorator(function):
         def wrapper(*args, **kwargs):
             res = function(*args, **kwargs)
             return BooleanResult(res, msg, str(*args))
+
         return wrapper
+
     return real_decorator
 
 
-BasicType = collections.namedtuple('Type', ['name', 'validate'])
-Collection = collections.namedtuple('Type', ['name', 'validate'])
+BasicType = collections.namedtuple("Type", ["name", "validate"])
+Collection = collections.namedtuple("Type", ["name", "validate"])
 
 
-@validator_msg('Is x a dictionary')
+@validator_msg("Is x a dictionary")
 def _is_pydict(x):
     return isinstance(x, dict)
 
 
-@validator_msg('Is x a list')
+@validator_msg("Is x a list")
 def _is_list(x):
     return isinstance(x, list) or isinstance(x, tuple)
 
 
-@validator_msg('Is x a string')
+@validator_msg("Is x a string")
 def _is_string(x):
     return isinstance(x, str)
 
 
-@validator_msg('Is x an integer')
+@validator_msg("Is x an integer")
 def _is_integer(x):
     return isinstance(x, int)
 
 
-@validator_msg('Is x a number')
+@validator_msg("Is x a number")
 def _is_number(x):
     return isinstance(x, numbers.Number)
 
 
-@validator_msg('Is x a bool')
+@validator_msg("Is x a bool")
 def _is_bool(x):
     return isinstance(x, bool)
 
 
-NamedDict = Collection('named_dict', _is_pydict)
-Dict = Collection('dict', _is_pydict)
-List = Collection('list', _is_list)
-String = BasicType('string', _is_string)
-Integer = BasicType('integer', _is_integer)
-Number = BasicType('number', _is_number)
-Bool = BasicType('bool', _is_bool)
+NamedDict = Collection("named_dict", _is_pydict)
+Dict = Collection("dict", _is_pydict)
+List = Collection("list", _is_list)
+String = BasicType("string", _is_string)
+Integer = BasicType("integer", _is_integer)
+Number = BasicType("number", _is_number)
+Bool = BasicType("bool", _is_bool)
 
 
 # Meta types
 
-@validator_msg('Is x a type')
+
+@validator_msg("Is x a type")
 def _is_type(x):
     return isinstance(x, BasicType) or isinstance(x, Collection)
 
-_Type = BasicType('type', _is_type)
-_Callable = BasicType('callable', validator_msg('Is x callable')(callable))
+
+_Type = BasicType("type", _is_type)
+_Callable = BasicType("callable", validator_msg("Is x callable")(callable))

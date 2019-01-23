@@ -17,4 +17,4 @@ in all copies or substantial portions of the Software.
 """
 
 
-__version__ = '0.0.0'
+__version__ = "0.0.0"

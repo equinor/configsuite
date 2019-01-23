@@ -26,41 +26,36 @@ from configsuite import MetaKeys as MK
 from configsuite import types
 
 
-@configsuite.validator_msg('Is x an uint4')
+@configsuite.validator_msg("Is x an uint4")
 def _is_uint4(x):
-    return isinstance(x, int) and 0 <= x < 2**4
+    return isinstance(x, int) and 0 <= x < 2 ** 4
 
 
-@configsuite.validator_msg('Is x an uint8')
+@configsuite.validator_msg("Is x an uint8")
 def _is_uint8(x):
-    return isinstance(x, int) and 0 <= x < 2**8
+    return isinstance(x, int) and 0 <= x < 2 ** 8
 
 
-UInt4 = configsuite.BasicType('uint4', _is_uint4)
-UInt8 = configsuite.BasicType('uint8', _is_uint8)
+UInt4 = configsuite.BasicType("uint4", _is_uint4)
+UInt8 = configsuite.BasicType("uint8", _is_uint8)
 
 
 def _build_favourite_numbers_schema():
     return {
         MK.Type: types.NamedDict,
         MK.Content: {
-            'favourite_uint4': { MK.Type: UInt4 },
-            'favourite_uint8': { MK.Type: UInt8 },
-            'favourite_int': { MK.Type: types.Integer },
-        }
+            "favourite_uint4": {MK.Type: UInt4},
+            "favourite_uint8": {MK.Type: UInt8},
+            "favourite_int": {MK.Type: types.Integer},
+        },
     }
 
 
 def _build_valid_favourite_numbers_config():
-    return {
-        'favourite_uint4': 14,
-        'favourite_uint8': 42,
-        'favourite_int': 1337,
-    }
+    return {"favourite_uint4": 14, "favourite_uint8": 42, "favourite_int": 1337}
 
 
 class TestUserTypes(unittest.TestCase):
-
     def test_favourite_numbers_accepted(self):
         raw_config = _build_valid_favourite_numbers_config()
         schema = _build_favourite_numbers_schema()
@@ -69,13 +64,13 @@ class TestUserTypes(unittest.TestCase):
         self.assertTrue(config_suite.valid)
 
         config = config_suite.snapshot
-        self.assertEqual(raw_config['favourite_uint4'], config.favourite_uint4)
-        self.assertEqual(raw_config['favourite_uint8'], config.favourite_uint8)
-        self.assertEqual(raw_config['favourite_int'], config.favourite_int)
+        self.assertEqual(raw_config["favourite_uint4"], config.favourite_uint4)
+        self.assertEqual(raw_config["favourite_uint8"], config.favourite_uint8)
+        self.assertEqual(raw_config["favourite_int"], config.favourite_int)
 
     def test_favourite_numbers_too_big(self):
         raw_config = _build_valid_favourite_numbers_config()
-        raw_config['favourite_uint4'] = 2**4
+        raw_config["favourite_uint4"] = 2 ** 4
         schema = _build_favourite_numbers_schema()
         config_suite = configsuite.ConfigSuite(raw_config, schema)
 
@@ -83,9 +78,9 @@ class TestUserTypes(unittest.TestCase):
         self.assertEqual(1, len(config_suite.errors))
         err = config_suite.errors[0]
         self.assertIsInstance(err, configsuite.InvalidTypeError)
-        self.assertEqual(('favourite_uint4',), err.key_path)
+        self.assertEqual(("favourite_uint4",), err.key_path)
 
         config = config_suite.snapshot
-        self.assertEqual(raw_config['favourite_uint4'], config.favourite_uint4)
-        self.assertEqual(raw_config['favourite_uint8'], config.favourite_uint8)
-        self.assertEqual(raw_config['favourite_int'], config.favourite_int)
+        self.assertEqual(raw_config["favourite_uint4"], config.favourite_uint4)
+        self.assertEqual(raw_config["favourite_uint8"], config.favourite_uint8)
+        self.assertEqual(raw_config["favourite_int"], config.favourite_int)

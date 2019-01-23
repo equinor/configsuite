@@ -19,11 +19,12 @@ in all copies or substantial portions of the Software.
 
 import enum
 
+
 class MetaKeys(enum.Enum):
-    Type = 'string'
-    Content = 'content'
-    Item = 'item'
-    Required = 'required'
-    ElementValidators = 'element_validators'
-    Key = 'key'
-    Value = 'value'
+    Type = "string"
+    Content = "content"
+    Item = "item"
+    Required = "required"
+    ElementValidators = "element_validators"
+    Key = "key"
+    Value = "value"

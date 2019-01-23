@@ -33,6 +33,6 @@ setuptools.setup(
         'setuptools_scm',
         'setuptools_scm_about'
     ],
-    tests_require=['pytest'],
+    tests_require=['pytest', 'black ; python_version>="3.6"'],
     test_suite='tests',
 )
