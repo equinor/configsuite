@@ -34,3 +34,4 @@ from .validation_errors import (
 )
 from .validator import Validator
 from .config import ConfigSuite
+from configsuite import docs
