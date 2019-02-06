@@ -28,3 +28,4 @@ class MetaKeys(enum.Enum):
     ElementValidators = "element_validators"
     Key = "key"
     Value = "value"
+    Description = "description"
