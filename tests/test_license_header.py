@@ -16,7 +16,7 @@ The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
 """
 
-
+import datetime
 import unittest
 import os
 import configsuite
@@ -24,7 +24,7 @@ import configsuite
 
 class TestLicenseHeaders(unittest.TestCase):
 
-    header = """\"\"\"Copyright 2018 Equinor ASA and The Netherlands Organisation for
+    header_fmt = """\"\"\"Copyright {year} Equinor ASA and The Netherlands Organisation for
 Applied Scientific Research TNO.
 
 Licensed under the MIT license.
@@ -60,12 +60,20 @@ in all copies or substantial portions of the Software.
             )
 
         self.source_files = filter(is_source_file, map(os.path.realpath, source_files))
+        self.valid_years = range(2018, datetime.datetime.now().year + 1)
 
     def test_license_headers(self):
-        header_length = self.header.count("\n")
+        header_length = self.header_fmt.count("\n")
 
         for sfile in self.source_files:
             with open(sfile) as f:
                 file_header = "".join(f.readlines()[:header_length])
                 err_msg = "{} missing correct header".format(sfile)
-                self.assertEqual(self.header, file_header, err_msg)
+                valid_header = any(
+                    [
+                        self.header_fmt.format(year=year) == file_header
+                        for year in self.valid_years
+                    ]
+                )
+
+                self.assertTrue(valid_header, err_msg)
