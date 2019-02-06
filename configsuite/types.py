@@ -47,10 +47,6 @@ class BooleanResult(object):
         msg_fmt = "{} is {} on input {}"
         return msg_fmt.format(self._msg, "true" if self else "false", self._input)
 
-    @property
-    def raw_msg(self):
-        return self._msg
-
     def __repr__(self):
         fmt = "BooleanResult({}, {}, {})"
         return fmt.format(bool(self), self._msg, self._input)
@@ -75,17 +71,31 @@ def validator_msg(msg):
     """
 
     def real_decorator(function):
-        def wrapper(*args, **kwargs):
-            res = function(*args, **kwargs)
-            return BooleanResult(res, msg, str(*args))
+        class Wrapper(object):
+            def __init__(self, function, msg):
+                self._function = function
+                self._msg = msg
 
-        return wrapper
+            @property
+            def msg(self):
+                return self._msg
+
+            def __call__(self, *args, **kwargs):
+                res = self._function(*args, **kwargs)
+                return BooleanResult(res, self._msg, str(*args) + str(**kwargs))
+
+        return Wrapper(function, msg)
 
     return real_decorator
 
 
 BasicType = collections.namedtuple("Type", ["name", "validate"])
 Collection = collections.namedtuple("Type", ["name", "validate"])
+
+_type_eq = lambda self, other: self.name == other.name
+_type_neq = lambda *args: not _type_eq(*args)
+Collection.__eq__ = _type_eq
+Collection.__neq__ = lambda *args: not _type_neq
 
 
 @validator_msg("Is x a dictionary")
