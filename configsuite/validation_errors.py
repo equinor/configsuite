@@ -20,27 +20,57 @@ in all copies or substantial portions of the Software.
 import collections
 
 
-class ValidationErrorNames(object):
-    UNKNOWN_KEY = "unknown_key"
-    MISSING_KEY = "missing_key"
-    INVALID_TYPE = "invalid_type"
-    INVALID_VALUE = "invalid_value"
+class ValidationError(object):
+    def __init__(self, message, key_path, layer=None):
+        self._message = message
+        self._key_path = key_path
+        self._layer = layer
+
+    def __repr__(self):
+        return "{}(msg={}, key_path={}, layer={})".format(
+            self.__class__.__name__, self.msg, self.key_path, self.layer
+        )
+
+    @property
+    def msg(self):
+        return self._message
+
+    @property
+    def key_path(self):
+        return self._key_path
+
+    @property
+    def layer(self):
+        return self._layer
+
+    def create_layer_error(self, layer):
+        return self.__class__(self.msg, self.key_path, layer=layer)
+
+    def __eq__(self, other):
+        return (
+            self.msg == other.msg
+            and self.key_path == other.key_path
+            and self.layer == other.layer
+        )
+
+    def __neq__(self, other):
+        return not (self == other)
+
+    def __hash__(self):
+        return hash((self.msg, self.key_path, self.layer))
 
 
-UnknownKeyError = collections.namedtuple(
-    ValidationErrorNames.UNKNOWN_KEY, ("msg", "key_path")
-)
+class UnknownKeyError(ValidationError):
+    pass
 
 
-MissingKeyError = collections.namedtuple(
-    ValidationErrorNames.MISSING_KEY, ("msg", "key_path")
-)
+class MissingKeyError(ValidationError):
+    pass
 
 
-InvalidTypeError = collections.namedtuple(
-    ValidationErrorNames.INVALID_TYPE, ("msg", "key_path")
-)
+class InvalidValueError(ValidationError):
+    pass
 
-InvalidValueError = collections.namedtuple(
-    ValidationErrorNames.INVALID_VALUE, ("msg", "key_path")
-)
+
+class InvalidTypeError(ValidationError):
+    pass

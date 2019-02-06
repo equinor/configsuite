@@ -26,8 +26,11 @@ ValidationResult = collections.namedtuple("ValidationResult", ("valid", "errors"
 
 
 class Validator(object):
-    def __init__(self, schema):
+    def __init__(self, schema, stop_condition=(lambda config, schema, key_path: False)):
         self._schema = schema
+        self._errors = None
+        self._key_stack = None
+        self._stop_condition = stop_condition
 
     def validate(self, config):
         self._errors = []
@@ -36,6 +39,9 @@ class Validator(object):
         return ValidationResult(valid=valid, errors=tuple(self._errors))
 
     def _validate(self, config, schema):
+        if self._stop_condition(config, schema, self._key_stack):
+            return True
+
         data_type = schema[MK.Type]
 
         valid = data_type.validate(config)

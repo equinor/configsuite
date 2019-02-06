@@ -26,7 +26,7 @@ except ImportError:
 from .meta_keys import MetaKeys
 from .types import BasicType, Collection, String, NamedDict, validator_msg
 from .validation_errors import (
-    ValidationErrorNames,
+    ValidationError,
     InvalidTypeError,
     MissingKeyError,
     UnknownKeyError,

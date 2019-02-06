@@ -202,7 +202,7 @@ class TestDict(unittest.TestCase):
             )
             for elem in config_suite.snapshot.prices
         ]
-        self.assertEqual(raw_prices, prices)
+        self.assertEqual(sorted(raw_prices), sorted(prices))
 
     def test_advanced_store_config_faulty_schema(self):
         raw_config = _build_valid_advanced_store_config()
