@@ -30,9 +30,14 @@ setuptools.setup(
     install_requires=['enum34==1.1.6 ; python_version<"3.4"'],
     setup_requires=[
         'pytest-runner',
+        'pytest-pylint',
         'setuptools_scm',
         'setuptools_scm_about'
     ],
-    tests_require=['pytest', 'black ; python_version>="3.6"'],
+    tests_require=[
+        'pytest',
+        'black ; python_version>="3.6"',
+        'click ; python_version>="3.6"',
+        'pylint'],
     test_suite='tests',
 )
