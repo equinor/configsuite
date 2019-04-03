@@ -93,9 +93,9 @@ BasicType = collections.namedtuple("Type", ["name", "validate"])
 Collection = collections.namedtuple("Type", ["name", "validate"])
 
 _type_eq = lambda self, other: self.name == other.name
-_type_neq = lambda *args: not _type_eq(*args)
+_type_neq = lambda self, other: not _type_eq(self, other)
 Collection.__eq__ = _type_eq
-Collection.__neq__ = lambda *args: not _type_neq
+Collection.__neq__ = lambda self, other: not _type_neq(self, other)
 
 
 @validator_msg("Is x a dictionary")

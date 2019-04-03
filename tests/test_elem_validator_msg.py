@@ -55,4 +55,5 @@ class TestElemValidatorMsg(unittest.TestCase):
         res_msg_fmt = "{} is {} on input {}"
         for x in (True, False):
             expected_msg = res_msg_fmt.format(msg, str(x).lower(), x)
+            # pylint: disable=no-member
             self.assertEqual(expected_msg, identity(x).msg)
