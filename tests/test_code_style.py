@@ -26,7 +26,10 @@ import pytest
 class TestCodeFormat(unittest.TestCase):
     @unittest.skipIf(sys.version_info < (3, 6), reason="requires python3.6 or higher")
     def test_code_style(self):
+        # pylint: disable=import-error
         import black
+
+        # pylint: disable=import-error
         from click.testing import CliRunner
 
         root_dir = os.path.dirname(os.path.dirname(__file__))
