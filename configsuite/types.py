@@ -17,7 +17,6 @@ in all copies or substantial portions of the Software.
 """
 
 
-import enum
 import collections
 import numbers
 
@@ -145,5 +144,5 @@ def _is_type(x):
     return isinstance(x, BasicType) or isinstance(x, Collection)
 
 
-_Type = BasicType("type", _is_type)
-_Callable = BasicType("callable", validator_msg("Is x callable")(callable))
+Type = BasicType("type", _is_type)
+Callable = BasicType("callable", validator_msg("Is x callable")(callable))

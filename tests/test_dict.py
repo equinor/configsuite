@@ -17,7 +17,6 @@ in all copies or substantial portions of the Software.
 """
 
 
-import numbers
 import unittest
 
 
@@ -138,7 +137,7 @@ class TestDict(unittest.TestCase):
         store_schema[MK.Content]["prices"][MK.Content].pop(MK.Key)
 
         with self.assertRaises(KeyError):
-            config_suite = configsuite.ConfigSuite(raw_config, store_schema)
+            configsuite.ConfigSuite(raw_config, store_schema)
 
     def test_invalid_schema_no_value(self):
         raw_config = _build_valid_store_config()
@@ -146,7 +145,7 @@ class TestDict(unittest.TestCase):
         store_schema[MK.Content]["prices"][MK.Content].pop(MK.Value)
 
         with self.assertRaises(KeyError):
-            config_suite = configsuite.ConfigSuite(raw_config, store_schema)
+            configsuite.ConfigSuite(raw_config, store_schema)
 
     def test_invalid_schema_extra_spec(self):
         raw_config = _build_valid_store_config()
@@ -154,7 +153,7 @@ class TestDict(unittest.TestCase):
         store_schema[MK.Content]["prices"][MK.Content]["monkey"] = "patch"
 
         with self.assertRaises(KeyError):
-            config_suite = configsuite.ConfigSuite(raw_config, store_schema)
+            configsuite.ConfigSuite(raw_config, store_schema)
 
     def test_valid_store_config_faulty_key(self):
         raw_config = _build_valid_store_config()
@@ -212,4 +211,4 @@ class TestDict(unittest.TestCase):
         ].pop(MK.Type)
 
         with self.assertRaises(KeyError):
-            config_suite = configsuite.ConfigSuite(raw_config, store_schema)
+            configsuite.ConfigSuite(raw_config, store_schema)

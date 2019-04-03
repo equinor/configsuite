@@ -72,35 +72,35 @@ class TestSchemaValidation(unittest.TestCase):
         schema = _build_candybag_schema()
         schema.pop(MK.Type)
         with self.assertRaises(KeyError):
-            config_suite = configsuite.ConfigSuite(raw_config, schema)
+            configsuite.ConfigSuite(raw_config, schema)
 
     def test_extra_key_first_level(self):
         raw_config = _build_valid_candibag_config()
         schema = _build_candybag_schema()
         schema["unknown"] = "some value"
         with self.assertRaises(KeyError):
-            config_suite = configsuite.ConfigSuite(raw_config, schema)
+            configsuite.ConfigSuite(raw_config, schema)
 
     def test_invalid_type_first_level(self):
         raw_config = _build_valid_candibag_config()
         schema = _build_candybag_schema()
         schema[MK.Required] = "some value"
         with self.assertRaises(TypeError):
-            config_suite = configsuite.ConfigSuite(raw_config, schema)
+            configsuite.ConfigSuite(raw_config, schema)
 
     def test_dict_missing_content(self):
         raw_config = _build_valid_candibag_config()
         schema = _build_candybag_schema()
         schema[MK.Content][MK.Item].pop(MK.Content)
         with self.assertRaises(KeyError):
-            config_suite = configsuite.ConfigSuite(raw_config, schema)
+            configsuite.ConfigSuite(raw_config, schema)
 
     def test_invalid_schema_dict_value(self):
         raw_config = _build_valid_candibag_config()
         schema = _build_candybag_schema()
         schema[MK.Content][MK.Item][MK.Content]["color"].pop(MK.Type)
         with self.assertRaises(KeyError):
-            config_suite = configsuite.ConfigSuite(raw_config, schema)
+            configsuite.ConfigSuite(raw_config, schema)
 
     def test_invalid_dict_keys(self):
         invalid_keys = ["1monkey", "monkey-donkey", "a b c"]
@@ -110,25 +110,25 @@ class TestSchemaValidation(unittest.TestCase):
         for inv_key in invalid_keys:
             schema[MK.Content][MK.Item][MK.Content][inv_key] = {MK.Type: types.String}
             with self.assertRaises(KeyError):
-                config_suite = configsuite.ConfigSuite(raw_config, schema)
+                configsuite.ConfigSuite(raw_config, schema)
 
     def test_list_missing_content(self):
         raw_config = _build_valid_candibag_config()
         schema = _build_candybag_schema()
         schema.pop(MK.Content)
         with self.assertRaises(KeyError):
-            config_suite = configsuite.ConfigSuite(raw_config, schema)
+            configsuite.ConfigSuite(raw_config, schema)
 
     def test_list_empty_content(self):
         raw_config = _build_valid_candibag_config()
         schema = _build_candybag_schema()
         schema[MK.Content].pop(MK.Item)
         with self.assertRaises(KeyError):
-            config_suite = configsuite.ConfigSuite(raw_config, schema)
+            configsuite.ConfigSuite(raw_config, schema)
 
     def test_list_dubious_content(self):
         raw_config = _build_valid_candibag_config()
         schema = _build_candybag_schema()
         schema[MK.Content]["dubious"] = "content"
         with self.assertRaises(KeyError):
-            config_suite = configsuite.ConfigSuite(raw_config, schema)
+            configsuite.ConfigSuite(raw_config, schema)

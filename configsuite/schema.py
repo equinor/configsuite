@@ -23,18 +23,17 @@ import six
 import configsuite
 from configsuite import MetaKeys as MK
 from configsuite import types
-from .types import _Type, _Callable
 
 
 _META_SCHEMA = {
     MK.Type: types.NamedDict,
     MK.Content: {
-        MK.Type: {MK.Type: _Type},
+        MK.Type: {MK.Type: types.Type},
         MK.Required: {MK.Type: types.Bool, MK.Required: False},
         MK.ElementValidators: {
             MK.Type: types.List,
             MK.Required: False,
-            MK.Content: {MK.Item: {MK.Type: types._Callable}},
+            MK.Content: {MK.Item: {MK.Type: types.Callable}},
         },
     },
 }
