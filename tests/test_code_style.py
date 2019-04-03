@@ -20,7 +20,6 @@ in all copies or substantial portions of the Software.
 import unittest
 import sys
 import os
-import pytest
 
 
 class TestCodeFormat(unittest.TestCase):

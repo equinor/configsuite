@@ -30,7 +30,7 @@ class ConfigSuite(object):
     def __init__(self, raw_config, schema, layers=()):
         assert_valid_schema(schema)
         self._layers = tuple(
-            map(lambda layer: copy.deepcopy(layer), layers + (raw_config,))
+            [copy.deepcopy(layer) for layer in tuple(layers) + (raw_config,)]
         )
         self._cached_raw_config = None
         self._schema = copy.deepcopy(schema)
@@ -48,7 +48,7 @@ class ConfigSuite(object):
     @property
     def errors(self):
         if len(self._layers) == 1 and self.readable:
-            return tuple(filter(lambda err: err.layer is None, self._errors))
+            return tuple([err for err in self._errors if err.layer is None])
 
         return self._errors
 
@@ -151,9 +151,7 @@ class ConfigSuite(object):
             )
         elif data_type == configsuite.types.List:
             item_schema = schema[MK.Content][MK.Item]
-            return tuple(
-                map(lambda elem: self._build_snapshot(elem, item_schema), config)
-            )
+            return tuple([self._build_snapshot(elem, item_schema) for elem in config])
         elif data_type == configsuite.types.Dict:
             key_schema = schema[MK.Content][MK.Key]
             value_schema = schema[MK.Content][MK.Value]
@@ -182,7 +180,7 @@ class ConfigSuite(object):
             val_res = validator.validate(layer)
             errors += [error.create_layer_error(idx) for error in val_res.errors]
 
-        def _not_dict(config, schema, key_path):
+        def _not_dict(schema):
             dict_types = (configsuite.types.Dict, configsuite.types.NamedDict)
             return schema[MK.Type] not in dict_types
 
@@ -203,7 +201,7 @@ class ConfigSuite(object):
     def _validate_readability(self):
         readable_errors = (configsuite.UnknownKeyError, configsuite.MissingKeyError)
 
-        def _not_container(config, schema, key_path):
+        def _not_container(schema):
             return not isinstance(schema[MK.Type], configsuite.types.Collection)
 
         container_validator = configsuite.Validator(

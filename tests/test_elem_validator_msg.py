@@ -40,7 +40,7 @@ class TestElemValidatorMsg(unittest.TestCase):
         msg = "This function is self-imploding"
 
         @configsuite.validator_msg(msg)
-        def implode(self):
+        def implode(_):
             raise Exception("Thou shalt not call me")
 
         self.assertEqual(msg, implode.msg)

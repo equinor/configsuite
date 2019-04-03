@@ -60,6 +60,7 @@ class TestElementValidators(unittest.TestCase):
     def test_element_validator_valid(self):
         raw_config = _build_valid_candibag_config()
         config_suite = configsuite.ConfigSuite(raw_config, _build_candybag_schema())
+        self.assertTrue(config_suite.valid)
 
     def test_element_validator_single_fail(self):
         raw_config = _build_valid_candibag_config()
@@ -112,6 +113,6 @@ class TestElementValidators(unittest.TestCase):
 
         self.assertFalse(config_suite.valid)
         self.assertEqual(2, len(config_suite.errors))
-        for idx, err in enumerate(config_suite.errors):
+        for err in config_suite.errors:
             self.assertIsInstance(err, configsuite.InvalidValueError)
             self.assertEqual((0, "name"), err.key_path)
