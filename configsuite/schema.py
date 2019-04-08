@@ -30,6 +30,7 @@ _META_SCHEMA = {
     MK.Content: {
         MK.Type: {MK.Type: types.Type},
         MK.Required: {MK.Type: types.Bool, MK.Required: False},
+        MK.Description: {MK.Type: types.String, MK.Required: False},
         MK.ElementValidators: {
             MK.Type: types.List,
             MK.Required: False,
