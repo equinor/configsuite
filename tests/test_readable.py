@@ -19,42 +19,14 @@ in all copies or substantial portions of the Software.
 
 import unittest
 
-
 import configsuite
-from configsuite import MetaKeys as MK
-from configsuite import types
 
-
-def _build_hero_schema():
-    return {
-        MK.Type: types.NamedDict,
-        MK.Content: {
-            "heroes": {
-                MK.Type: types.List,
-                MK.Content: {
-                    MK.Item: {
-                        MK.Type: types.NamedDict,
-                        MK.Content: {
-                            "name": {MK.Type: types.String},
-                            "strength": {MK.Type: types.Integer},
-                        },
-                    }
-                },
-            },
-            "villains": {
-                MK.Type: types.Dict,
-                MK.Content: {
-                    MK.Key: {MK.Type: types.String},
-                    MK.Value: {MK.Type: types.Number},
-                },
-            },
-        },
-    }
+from . import data
 
 
 class TestReadable(unittest.TestCase):
     def test_not_readable(self):
-        schema = _build_hero_schema()
+        schema = data.hero.build_schema()
 
         heroes = {
             "heroes": [
@@ -72,7 +44,7 @@ class TestReadable(unittest.TestCase):
         self.assertFalse(layered_config.valid)
 
     def test_readable_not_valid(self):
-        schema = _build_hero_schema()
+        schema = data.hero.build_schema()
 
         heroes = {
             "heroes": [
@@ -90,7 +62,7 @@ class TestReadable(unittest.TestCase):
         self.assertFalse(layered_config.valid)
 
     def test_readable_valid(self):
-        schema = _build_hero_schema()
+        schema = data.hero.build_schema()
 
         heroes = {
             "heroes": [
@@ -108,7 +80,7 @@ class TestReadable(unittest.TestCase):
         self.assertTrue(layered_config.valid)
 
     def test_readable_missing_container(self):
-        schema = _build_hero_schema()
+        schema = data.hero.build_schema()
 
         heroes = {
             "heroes": [

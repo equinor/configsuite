@@ -19,45 +19,15 @@ in all copies or substantial portions of the Software.
 
 import unittest
 
-
 import configsuite
-from configsuite import MetaKeys as MK
-from configsuite import types
 
-
-@configsuite.validator_msg("Is x an uint4")
-def _is_uint4(x):
-    return isinstance(x, int) and 0 <= x < 2 ** 4
-
-
-@configsuite.validator_msg("Is x an uint8")
-def _is_uint8(x):
-    return isinstance(x, int) and 0 <= x < 2 ** 8
-
-
-UInt4 = configsuite.BasicType("uint4", _is_uint4)
-UInt8 = configsuite.BasicType("uint8", _is_uint8)
-
-
-def _build_favourite_numbers_schema():
-    return {
-        MK.Type: types.NamedDict,
-        MK.Content: {
-            "favourite_uint4": {MK.Type: UInt4},
-            "favourite_uint8": {MK.Type: UInt8},
-            "favourite_int": {MK.Type: types.Integer},
-        },
-    }
-
-
-def _build_valid_favourite_numbers_config():
-    return {"favourite_uint4": 14, "favourite_uint8": 42, "favourite_int": 1337}
+from . import data
 
 
 class TestUserTypes(unittest.TestCase):
     def test_favourite_numbers_accepted(self):
-        raw_config = _build_valid_favourite_numbers_config()
-        schema = _build_favourite_numbers_schema()
+        raw_config = data.favourite_numbers.build_config()
+        schema = data.favourite_numbers.build_schema()
         config_suite = configsuite.ConfigSuite(raw_config, schema)
 
         self.assertTrue(config_suite.valid)
@@ -68,9 +38,9 @@ class TestUserTypes(unittest.TestCase):
         self.assertEqual(raw_config["favourite_int"], config.favourite_int)
 
     def test_favourite_numbers_too_big(self):
-        raw_config = _build_valid_favourite_numbers_config()
+        raw_config = data.favourite_numbers.build_config()
         raw_config["favourite_uint4"] = 2 ** 4
-        schema = _build_favourite_numbers_schema()
+        schema = data.favourite_numbers.build_schema()
         config_suite = configsuite.ConfigSuite(raw_config, schema)
 
         self.assertFalse(config_suite.valid)
