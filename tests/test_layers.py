@@ -19,42 +19,14 @@ in all copies or substantial portions of the Software.
 
 import unittest
 
-
 import configsuite
-from configsuite import MetaKeys as MK
-from configsuite import types
 
-
-def _build_hero_schema():
-    return {
-        MK.Type: types.NamedDict,
-        MK.Content: {
-            "heroes": {
-                MK.Type: types.List,
-                MK.Content: {
-                    MK.Item: {
-                        MK.Type: types.NamedDict,
-                        MK.Content: {
-                            "name": {MK.Type: types.String},
-                            "strength": {MK.Type: types.Integer},
-                        },
-                    }
-                },
-            },
-            "villains": {
-                MK.Type: types.Dict,
-                MK.Content: {
-                    MK.Key: {MK.Type: types.String},
-                    MK.Value: {MK.Type: types.Number},
-                },
-            },
-        },
-    }
+from . import data
 
 
 class TestLayers(unittest.TestCase):
     def test_layers_named_dict_disjoint_push(self):
-        schema = _build_hero_schema()
+        schema = data.hero.build_schema()
 
         heroes = {
             "heroes": [
@@ -85,7 +57,7 @@ class TestLayers(unittest.TestCase):
         self.assertEqual(combined_config.snapshot, hero_villains_config.snapshot)
 
     def test_layers_named_dict_intersection_push(self):
-        schema = _build_hero_schema()
+        schema = data.hero.build_schema()
 
         heroes = {
             "heroes": [
@@ -117,7 +89,7 @@ class TestLayers(unittest.TestCase):
         self.assertEqual(combined_config.snapshot, hero_villains_config.snapshot)
 
     def test_layers_named_dict_disjoint_init(self):
-        schema = _build_hero_schema()
+        schema = data.hero.build_schema()
 
         heroes = {
             "heroes": [
@@ -146,7 +118,7 @@ class TestLayers(unittest.TestCase):
         self.assertEqual(combined_config.snapshot, layered_config.snapshot)
 
     def test_layers_named_dict_intersection_init(self):
-        schema = _build_hero_schema()
+        schema = data.hero.build_schema()
 
         heroes = {
             "heroes": [
@@ -176,7 +148,7 @@ class TestLayers(unittest.TestCase):
         self.assertEqual(combined_config.snapshot, layered_config.snapshot)
 
     def test_layers_list_init(self):
-        schema = _build_hero_schema()
+        schema = data.hero.build_schema()
 
         heroes = {
             "heroes": [{"name": "Batman", "strength": 10}],
@@ -205,7 +177,7 @@ class TestLayers(unittest.TestCase):
         self.assertEqual(combined_config.snapshot, layered_config.snapshot)
 
     def test_invalid_layer(self):
-        schema = _build_hero_schema()
+        schema = data.hero.build_schema()
 
         dummy_layer = {
             "heroes": [{"name": "Batman", "strength": 10}],
@@ -224,7 +196,7 @@ class TestLayers(unittest.TestCase):
         self.assertFalse(layered_config.valid)
 
     def test_invalid_layer_inside_list(self):
-        schema = _build_hero_schema()
+        schema = data.hero.build_schema()
 
         dummy_layer = {"heroes": [{"name": "Batman"}]}
 

@@ -19,110 +19,16 @@ in all copies or substantial portions of the Software.
 
 import unittest
 
-
 import configsuite
 from configsuite import MetaKeys as MK
-from configsuite import types
 
-
-@configsuite.validator_msg("Price should be non-negative")
-def _non_negative_price(elem):
-    return elem > 0
-
-
-def _build_store_schema():
-    return {
-        MK.Type: types.NamedDict,
-        MK.Content: {
-            "employees": {
-                MK.Type: types.Dict,
-                MK.Content: {
-                    MK.Key: {MK.Type: types.String},
-                    MK.Value: {
-                        MK.Type: types.NamedDict,
-                        MK.Content: {
-                            "salary": {MK.Type: types.Number},
-                            "shift_leader": {MK.Type: types.String},
-                        },
-                    },
-                },
-            },
-            "prices": {
-                MK.Type: types.Dict,
-                MK.Content: {
-                    MK.Key: {MK.Type: types.String},
-                    MK.Value: {
-                        MK.Type: types.Number,
-                        MK.ElementValidators: (_non_negative_price,),
-                    },
-                },
-            },
-        },
-    }
-
-
-def _build_valid_store_config():
-    return {
-        "employees": {
-            "Are": {"salary": 4, "shift_leader": "Jonny"},
-            "Knut": {"salary": 1, "shift_leader": "Are"},
-        },
-        "prices": {"flour": 2.3, "pig": 10},
-    }
-
-
-def _build_advanced_store_schema():
-    return {
-        MK.Type: types.NamedDict,
-        MK.Content: {
-            "employees": {
-                MK.Type: types.Dict,
-                MK.Content: {
-                    MK.Key: {MK.Type: types.String},
-                    MK.Value: {
-                        MK.Type: types.NamedDict,
-                        MK.Content: {
-                            "salary": {MK.Type: types.Number},
-                            "shift_leader": {MK.Type: types.String},
-                        },
-                    },
-                },
-            },
-            "prices": {
-                MK.Type: types.Dict,
-                MK.Content: {
-                    MK.Key: {MK.Type: types.String},
-                    MK.Value: {
-                        MK.Type: types.NamedDict,
-                        MK.Content: {
-                            "kilo": {MK.Type: types.Number},
-                            "gram": {MK.Type: types.Number},
-                            "unit": {MK.Type: types.Number, MK.Required: False},
-                        },
-                    },
-                },
-            },
-        },
-    }
-
-
-def _build_valid_advanced_store_config():
-    return {
-        "employees": {
-            "Are": {"salary": 4, "shift_leader": "Jonny"},
-            "Knut": {"salary": 1, "shift_leader": "Are"},
-        },
-        "prices": {
-            "flour": {"kilo": 4.5, "gram": 30},
-            "pig": {"unit": 100, "kilo": 20, "gram": 3},
-        },
-    }
+from . import data
 
 
 class TestDict(unittest.TestCase):
     def test_valid_store_config(self):
-        raw_config = _build_valid_store_config()
-        store_schema = _build_store_schema()
+        raw_config = data.store.build_config()
+        store_schema = data.store.build_schema()
         config_suite = configsuite.ConfigSuite(raw_config, store_schema)
 
         self.assertTrue(config_suite.valid)
@@ -132,33 +38,33 @@ class TestDict(unittest.TestCase):
         )
 
     def test_invalid_schema_no_key(self):
-        raw_config = _build_valid_store_config()
-        store_schema = _build_store_schema()
+        raw_config = data.store.build_config()
+        store_schema = data.store.build_schema()
         store_schema[MK.Content]["prices"][MK.Content].pop(MK.Key)
 
         with self.assertRaises(KeyError):
             configsuite.ConfigSuite(raw_config, store_schema)
 
     def test_invalid_schema_no_value(self):
-        raw_config = _build_valid_store_config()
-        store_schema = _build_store_schema()
+        raw_config = data.store.build_config()
+        store_schema = data.store.build_schema()
         store_schema[MK.Content]["prices"][MK.Content].pop(MK.Value)
 
         with self.assertRaises(KeyError):
             configsuite.ConfigSuite(raw_config, store_schema)
 
     def test_invalid_schema_extra_spec(self):
-        raw_config = _build_valid_store_config()
-        store_schema = _build_store_schema()
+        raw_config = data.store.build_config()
+        store_schema = data.store.build_schema()
         store_schema[MK.Content]["prices"][MK.Content]["monkey"] = "patch"
 
         with self.assertRaises(KeyError):
             configsuite.ConfigSuite(raw_config, store_schema)
 
     def test_valid_store_config_faulty_key(self):
-        raw_config = _build_valid_store_config()
+        raw_config = data.store.build_config()
         raw_config["prices"][123] = 1
-        store_schema = _build_store_schema()
+        store_schema = data.store.build_schema()
         config_suite = configsuite.ConfigSuite(raw_config, store_schema)
 
         self.assertFalse(config_suite.valid)
@@ -167,9 +73,9 @@ class TestDict(unittest.TestCase):
         self.assertIsInstance(err, configsuite.InvalidTypeError)
 
     def test_valid_store_config_faulty_value(self):
-        raw_config = _build_valid_store_config()
+        raw_config = data.store.build_config()
         raw_config["prices"]["pig"] = "very expensive"
-        store_schema = _build_store_schema()
+        store_schema = data.store.build_schema()
         config_suite = configsuite.ConfigSuite(raw_config, store_schema)
 
         self.assertFalse(config_suite.valid)
@@ -178,8 +84,8 @@ class TestDict(unittest.TestCase):
         self.assertIsInstance(err, configsuite.InvalidTypeError)
 
     def test_valid_advanded_store_config(self):
-        raw_config = _build_valid_advanced_store_config()
-        store_schema = _build_advanced_store_schema()
+        raw_config = data.advanced_store.build_config()
+        store_schema = data.advanced_store.build_schema()
         config_suite = configsuite.ConfigSuite(raw_config, store_schema)
 
         self.assertTrue(config_suite.valid)
@@ -204,8 +110,8 @@ class TestDict(unittest.TestCase):
         self.assertEqual(sorted(raw_prices), sorted(prices))
 
     def test_advanced_store_config_faulty_schema(self):
-        raw_config = _build_valid_advanced_store_config()
-        store_schema = _build_advanced_store_schema()
+        raw_config = data.advanced_store.build_config()
+        store_schema = data.advanced_store.build_schema()
         store_schema[MK.Content]["prices"][MK.Content][MK.Value][MK.Content][
             "kilo"
         ].pop(MK.Type)

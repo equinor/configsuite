@@ -20,61 +20,15 @@ in all copies or substantial portions of the Software.
 import numbers
 import unittest
 
-
 import configsuite
-from configsuite import MetaKeys as MK
-from configsuite import types
 
-
-def _build_name_pet_schema():
-    return {
-        MK.Type: types.NamedDict,
-        MK.Content: {
-            "name": {MK.Type: types.String},
-            "pet": {
-                MK.Type: types.NamedDict,
-                MK.Content: {
-                    "name": {MK.Type: types.String},
-                    "favourite_food": {MK.Type: types.String},
-                    "weight": {MK.Type: types.Number},
-                    "nkids": {MK.Type: types.Integer},
-                    "likeable": {MK.Type: types.Bool},
-                },
-            },
-            "playgrounds": {
-                MK.Type: types.List,
-                MK.Content: {
-                    MK.Item: {
-                        MK.Type: types.NamedDict,
-                        MK.Content: {
-                            "name": {MK.Type: types.String},
-                            "score": {MK.Type: types.Integer},
-                        },
-                    }
-                },
-            },
-        },
-    }
-
-
-def _build_valid_pet_config():
-    return {
-        "name": "Markus",
-        "pet": {
-            "name": "Donkey Kong",
-            "favourite_food": "bananas",
-            "weight": 1.9,
-            "nkids": 8,
-            "likeable": True,
-        },
-        "playgrounds": [],
-    }
+from . import data
 
 
 class TestTypes(unittest.TestCase):
     def test_name_pet_accepted(self):
-        raw_config = _build_valid_pet_config()
-        config_suite = configsuite.ConfigSuite(raw_config, _build_name_pet_schema())
+        raw_config = data.pets.build_config()
+        config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
 
         self.assertTrue(config_suite.valid)
 
@@ -85,9 +39,9 @@ class TestTypes(unittest.TestCase):
 
     def test_invalid_string(self):
         for name in [14, None, [], (), {}]:
-            raw_config = _build_valid_pet_config()
+            raw_config = data.pets.build_config()
             raw_config["name"] = name
-            config_suite = configsuite.ConfigSuite(raw_config, _build_name_pet_schema())
+            config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
 
             self.assertFalse(config_suite.valid)
 
@@ -105,7 +59,7 @@ class TestTypes(unittest.TestCase):
 
     def test_invalid_base_dict(self):
         for raw_config in [14, None, [{"name": "Markus"}], ()]:
-            config_suite = configsuite.ConfigSuite(raw_config, _build_name_pet_schema())
+            config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
             self.assertFalse(config_suite.valid)
 
             self.assertEqual(1, len(config_suite.errors))
@@ -115,9 +69,9 @@ class TestTypes(unittest.TestCase):
 
     def test_invalid_dict(self):
         for pet in [14, None, [{"name": "Markus"}], ()]:
-            raw_config = _build_valid_pet_config()
+            raw_config = data.pets.build_config()
             raw_config["pet"] = pet
-            config_suite = configsuite.ConfigSuite(raw_config, _build_name_pet_schema())
+            config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
             self.assertFalse(config_suite.valid)
 
             self.assertEqual(1, len(config_suite.errors))
@@ -127,9 +81,9 @@ class TestTypes(unittest.TestCase):
 
     def test_string(self):
         for strval in ["fdnsjk", "", "str4thewin", True, [], 1, 1.2, {}, None]:
-            raw_config = _build_valid_pet_config()
+            raw_config = data.pets.build_config()
             raw_config["name"] = strval
-            config_suite = configsuite.ConfigSuite(raw_config, _build_name_pet_schema())
+            config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
 
             if isinstance(strval, str):
                 self.assertTrue(config_suite.valid)
@@ -144,9 +98,9 @@ class TestTypes(unittest.TestCase):
 
     def test_int(self):
         for intval in ["fdnsjk", "", False, 0, -10, [], 1, 1.2, {}, None]:
-            raw_config = _build_valid_pet_config()
+            raw_config = data.pets.build_config()
             raw_config["pet"]["nkids"] = intval
-            config_suite = configsuite.ConfigSuite(raw_config, _build_name_pet_schema())
+            config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
 
             if isinstance(intval, int):
                 self.assertTrue(config_suite.valid)
@@ -161,9 +115,9 @@ class TestTypes(unittest.TestCase):
 
     def test_number(self):
         for numval in [False, True, "fdnsjk", "", 0, -10, [], 1, 1.2, {}, None]:
-            raw_config = _build_valid_pet_config()
+            raw_config = data.pets.build_config()
             raw_config["pet"]["weight"] = numval
-            config_suite = configsuite.ConfigSuite(raw_config, _build_name_pet_schema())
+            config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
 
             if isinstance(numval, numbers.Number):
                 self.assertTrue(config_suite.valid)
@@ -178,9 +132,9 @@ class TestTypes(unittest.TestCase):
 
     def test_bool(self):
         for boolval in [False, True, "fdnsjk", "", 0, -10, [], 1, 1.2, {}, None]:
-            raw_config = _build_valid_pet_config()
+            raw_config = data.pets.build_config()
             raw_config["pet"]["likeable"] = boolval
-            config_suite = configsuite.ConfigSuite(raw_config, _build_name_pet_schema())
+            config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
 
             if isinstance(boolval, bool):
                 self.assertTrue(config_suite.valid)
@@ -197,9 +151,9 @@ class TestTypes(unittest.TestCase):
         playgrounds = [{"name": "superfun", "score": 1}, {"name": "Hell", "score": 99}]
 
         for end_idx, _ in enumerate(playgrounds):
-            raw_config = _build_valid_pet_config()
+            raw_config = data.pets.build_config()
             raw_config["playgrounds"] = playgrounds[:end_idx]
-            config_suite = configsuite.ConfigSuite(raw_config, _build_name_pet_schema())
+            config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
 
             self.assertTrue(config_suite.valid, "Errors: %r" % (config_suite.errors,))
             config = config_suite.snapshot
@@ -210,9 +164,9 @@ class TestTypes(unittest.TestCase):
                 self.assertEqual(plgr["score"], config.playgrounds[idx].score)
 
     def test_list_errors(self):
-        raw_config = _build_valid_pet_config()
+        raw_config = data.pets.build_config()
         raw_config["playgrounds"] = [{"name": "faulty grounds"}]
-        config_suite = configsuite.ConfigSuite(raw_config, _build_name_pet_schema())
+        config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
 
         self.assertFalse(config_suite.valid)
         self.assertEqual(1, len(config_suite.errors))
