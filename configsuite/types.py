@@ -104,7 +104,7 @@ def _is_pydict(x):
 
 @validator_msg("Is x a list")
 def _is_list(x):
-    return isinstance(x, list) or isinstance(x, tuple)
+    return isinstance(x, (list, tuple))
 
 
 @validator_msg("Is x a string")
@@ -141,7 +141,7 @@ Bool = BasicType("bool", _is_bool)
 
 @validator_msg("Is x a type")
 def _is_type(x):
-    return isinstance(x, BasicType) or isinstance(x, Collection)
+    return isinstance(x, (BasicType, Collection))
 
 
 Type = BasicType("type", _is_type)
