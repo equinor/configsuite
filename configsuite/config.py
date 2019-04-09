@@ -130,6 +130,41 @@ class ConfigSuite(object):
             msg = "Encountered unknown type {} while building raw config"
             raise TypeError(msg.format(str(data_type)))
 
+    def _build_named_dict_snapshot(self, config, schema):
+        data_type = schema[MK.Type]
+        content_schema = schema[MK.Content]
+        dict_name = data_type.name
+        dict_keys = sorted(content_schema.keys())
+        dict_collection = collections.namedtuple(dict_name, dict_keys)
+
+        return dict_collection(
+            **{
+                key: self._build_snapshot(config.get(key), content_schema[key])
+                for key in content_schema
+            }
+        )
+
+    def _build_list_snapshot(self, config, schema):
+        item_schema = schema[MK.Content][MK.Item]
+        return tuple([self._build_snapshot(elem, item_schema) for elem in config])
+
+    def _build_dict_snapshot(self, config, schema):
+        key_schema = schema[MK.Content][MK.Key]
+        value_schema = schema[MK.Content][MK.Value]
+
+        Pair = collections.namedtuple("KeyValuePair", ["key", "value"])
+        return tuple(
+            sorted(
+                [
+                    Pair(
+                        self._build_snapshot(key, key_schema),
+                        self._build_snapshot(value, value_schema),
+                    )
+                    for key, value in config.items()
+                ]
+            )
+        )
+
     def _build_snapshot(self, config, schema):
         if config is None:
             return None
@@ -138,36 +173,11 @@ class ConfigSuite(object):
         if isinstance(data_type, configsuite.BasicType):
             return config
         elif data_type == configsuite.types.NamedDict:
-            content_schema = schema[MK.Content]
-            dict_name = data_type.name
-            dict_keys = sorted(content_schema.keys())
-            dict_collection = collections.namedtuple(dict_name, dict_keys)
-
-            return dict_collection(
-                **{
-                    key: self._build_snapshot(config.get(key), content_schema[key])
-                    for key in content_schema
-                }
-            )
+            return self._build_named_dict_snapshot(config, schema)
         elif data_type == configsuite.types.List:
-            item_schema = schema[MK.Content][MK.Item]
-            return tuple([self._build_snapshot(elem, item_schema) for elem in config])
+            return self._build_list_snapshot(config, schema)
         elif data_type == configsuite.types.Dict:
-            key_schema = schema[MK.Content][MK.Key]
-            value_schema = schema[MK.Content][MK.Value]
-
-            Pair = collections.namedtuple("KeyValuePair", ["key", "value"])
-            return tuple(
-                sorted(
-                    [
-                        Pair(
-                            self._build_snapshot(key, key_schema),
-                            self._build_snapshot(value, value_schema),
-                        )
-                        for key, value in config.items()
-                    ]
-                )
-            )
+            return self._build_dict_snapshot(config, schema)
         else:
             msg = "Encountered unknown type {} while building snapshot"
             raise TypeError(msg.format(str(data_type)))
