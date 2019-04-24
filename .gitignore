@@ -61,3 +61,6 @@ builds/
 
 # Specific files
 configsuite/_version.py
+
+# IDE
+.vscode
