@@ -37,7 +37,7 @@ class ConfigSuite(object):
         self._snapshot = None
         self._valid = None
         self._errors = None
-        self._reabable = None
+        self._readable = None
         self._validate()
         self._assert_state()
 
