@@ -19,6 +19,7 @@ in all copies or substantial portions of the Software.
 
 import collections
 import numbers
+import datetime
 
 
 class BooleanResult(object):
@@ -127,6 +128,16 @@ def _is_bool(x):
     return isinstance(x, bool)
 
 
+@validator_msg("Is x a date")
+def _is_date(x):
+    return isinstance(x, datetime.date)
+
+
+@validator_msg("Is x a datetime")
+def _is_datetime(x):
+    return isinstance(x, datetime.datetime)
+
+
 NamedDict = Collection("named_dict", _is_pydict)
 Dict = Collection("dict", _is_pydict)
 List = Collection("list", _is_list)
@@ -134,7 +145,8 @@ String = BasicType("string", _is_string)
 Integer = BasicType("integer", _is_integer)
 Number = BasicType("number", _is_number)
 Bool = BasicType("bool", _is_bool)
-
+Date = BasicType("date", _is_date)
+DateTime = BasicType("datetime", _is_datetime)
 
 # Meta types
 
