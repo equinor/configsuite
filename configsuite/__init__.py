@@ -24,7 +24,19 @@ except ImportError:
 
 
 from .meta_keys import MetaKeys
-from .types import BasicType, Collection, String, NamedDict, validator_msg
+from .types import (
+    BasicType,
+    Collection,
+    String,
+    Integer,
+    List,
+    Number,
+    Date,
+    DateTime,
+    Dict,
+    NamedDict,
+    validator_msg,
+)
 from .validation_errors import (
     ValidationError,
     InvalidTypeError,

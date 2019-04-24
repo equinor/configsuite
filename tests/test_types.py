@@ -16,7 +16,7 @@ The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
 """
 
-
+import datetime
 import numbers
 import unittest
 
@@ -173,3 +173,45 @@ class TestTypes(unittest.TestCase):
         err = config_suite.errors[0]
         self.assertIsInstance(err, configsuite.MissingKeyError)
         self.assertEqual(("playgrounds", 0), err.key_path)
+
+    def test_date(self):
+        timestamp = datetime.datetime(2015, 1, 2, 3, 4, 5)
+        date = datetime.date(2010, 1, 1)
+        types = [timestamp, date, "fdnsjk", "", 0, -10, [], 1, 1.2, {}, None]
+
+        for date in types:
+            raw_config = data.pets.build_config()
+            raw_config["pet"]["birthday"] = date
+            config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
+
+            if isinstance(date, datetime.date):
+                self.assertTrue(config_suite.valid)
+                self.assertEqual(date, config_suite.snapshot.pet.birthday)
+                self.assertEqual(0, len(config_suite.errors))
+            else:
+                self.assertFalse(config_suite.valid)
+                self.assertEqual(1, len(config_suite.errors))
+                err = config_suite.errors[0]
+                self.assertIsInstance(err, configsuite.InvalidTypeError)
+                self.assertEqual(("pet", "birthday"), err.key_path)
+
+    def test_datetime(self):
+        timestamp = datetime.datetime(2015, 1, 2, 3, 4, 5)
+        date = datetime.date(2010, 1, 1)
+        types = [timestamp, date, "fdnsjk", "", 0, -10, [], 1, 1.2, {}, None]
+
+        for date in types:
+            raw_config = data.pets.build_config()
+            raw_config["pet"]["timestamp"] = date
+            config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
+
+            if isinstance(date, datetime.datetime):
+                self.assertTrue(config_suite.valid)
+                self.assertEqual(date, config_suite.snapshot.pet.timestamp)
+                self.assertEqual(0, len(config_suite.errors))
+            else:
+                self.assertFalse(config_suite.valid)
+                self.assertEqual(1, len(config_suite.errors))
+                err = config_suite.errors[0]
+                self.assertIsInstance(err, configsuite.InvalidTypeError)
+                self.assertEqual(("pet", "timestamp"), err.key_path)

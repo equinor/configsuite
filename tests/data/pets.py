@@ -17,6 +17,7 @@ in all copies or substantial portions of the Software.
 """
 
 
+import datetime
 import configsuite
 from configsuite import MetaKeys as MK
 from configsuite import types
@@ -40,6 +41,10 @@ def build_schema():
                 MK.Description: "Information about your pet.",
                 MK.Content: {
                     "name": {MK.Type: types.String, MK.Description: "Name of the pet."},
+                    "timestamp": {
+                        MK.Type: types.DateTime,
+                        MK.Description: "Record entry date.",
+                    },
                     "favourite_food": {
                         MK.Type: types.String,
                         MK.Description: "Favourite food of the pet.",
@@ -55,6 +60,10 @@ def build_schema():
                     "likeable": {
                         MK.Type: types.Bool,
                         MK.Description: "Is the pet likeable?",
+                    },
+                    "birthday": {
+                        MK.Type: types.Date,
+                        MK.Description: "Birthday of the pet.",
                     },
                 },
             },
@@ -104,10 +113,12 @@ def build_config():
         "name": "Markus",
         "pet": {
             "name": "Donkey Kong",
+            "timestamp": datetime.datetime(2018, 5, 6, 12, 58, 22),
             "favourite_food": "bananas",
             "weight": 1.9,
             "nkids": 8,
             "likeable": True,
+            "birthday": datetime.date(2018, 1, 1),
         },
         "playgrounds": [],
         "veterinary_scores": {"Dr. Dolittle": 10},
@@ -130,6 +141,11 @@ def build_docs():
 
         :type: string
 
+    **timestamp*:**
+        Record entry date.
+
+        :type: datetime
+
     **favourite_food*:**
         Favourite food of the pet.
 
@@ -149,6 +165,11 @@ def build_docs():
         Is the pet likeable?
 
         :type: bool
+
+    **birthday*:**
+        Birthday of the pet.
+
+        :type: date
 
 **playgrounds*:**
     List of all playgrounds you take your pet to.
