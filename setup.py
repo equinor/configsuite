@@ -22,7 +22,7 @@ import setuptools
 
 setuptools.setup(
     name="configsuite",
-    packages=["configsuite"],
+    packages=["configsuite", "configsuite.docs"],
     author="Software Innovation Bergen, Statoil ASA and TNO",
     use_scm_version={"write_to": "configsuite/_version.py"},
     install_requires=['enum34==1.1.6 ; python_version<"3.4"'],
