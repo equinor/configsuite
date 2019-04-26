@@ -16,8 +16,7 @@ The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
 """
 
-
-import configsuite
+from __future__ import absolute_import
 import subprocess
 import os
 

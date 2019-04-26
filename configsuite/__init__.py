@@ -16,15 +16,15 @@ The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
 """
 
+from __future__ import absolute_import
 
 try:
     from ._version import version as __version__
 except ImportError:
     from .__about__ import __version__
 
-
-from .meta_keys import MetaKeys
-from .types import (
+from configsuite.meta_keys import MetaKeys
+from configsuite.types import (
     BasicType,
     Collection,
     String,
@@ -37,13 +37,13 @@ from .types import (
     NamedDict,
     validator_msg,
 )
-from .validation_errors import (
+from configsuite.validation_errors import (
     ValidationError,
     InvalidTypeError,
     MissingKeyError,
     UnknownKeyError,
     InvalidValueError,
 )
-from .validator import Validator
-from .config import ConfigSuite
-from . import docs
+from configsuite.validator import Validator
+from configsuite.config import ConfigSuite
+from configsuite import docs
