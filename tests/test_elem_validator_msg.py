@@ -52,8 +52,42 @@ class TestElemValidatorMsg(unittest.TestCase):
         def identity(arg):
             return arg
 
-        res_msg_fmt = "{} is {} on input {}"
+        res_msg_fmt = "{} is {} on input '{}'"
         for x in (True, False):
             expected_msg = res_msg_fmt.format(msg, str(x).lower(), x)
             # pylint: disable=no-member
             self.assertEqual(expected_msg, identity(x).msg)
+
+    def test_multi_arg_msg(self):
+        msg = "The and function"
+
+        @configsuite.validator_msg(msg)
+        def _and(arg1, arg2):
+            return arg1 and arg2
+
+        expected_msg = "The and function is false on input 'True, False'"
+        # pylint: disable=no-member
+        self.assertEqual(expected_msg, _and(True, False).msg)
+
+    def test_result_msg_default_keyword(self):
+        msg = "The indentify function"
+
+        @configsuite.validator_msg(msg)
+        def identity(arg, return_none=False):
+            return None if return_none else arg
+
+        res_msg_fmt = "{} is {} on input '{}'"
+        for x in (True, False):
+            expected_msg = res_msg_fmt.format(msg, str(x).lower(), x)
+            # pylint: disable=no-member
+            self.assertEqual(expected_msg, identity(x).msg)
+
+    def test_keyword_arg(self):
+        msg = "The valid sum function"
+
+        @configsuite.validator_msg(msg)
+        def valid_sum(a, b, target_sum=42):
+            return a + b == target_sum
+
+        expected_msg = msg + " is true on input '8, 12, target_sum=20'"
+        self.assertEqual(expected_msg, valid_sum(8, 12, target_sum=20).msg)

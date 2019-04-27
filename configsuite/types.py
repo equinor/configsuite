@@ -44,7 +44,7 @@ class BooleanResult(object):
 
     @property
     def msg(self):
-        msg_fmt = "{} is {} on input {}"
+        msg_fmt = "{} is {} on input '{}'"
         return msg_fmt.format(self._msg, "true" if self else "false", self._input)
 
     def __repr__(self):
@@ -80,9 +80,19 @@ def validator_msg(msg):
             def msg(self):
                 return self._msg
 
+            def _build_argument_str(self, *args, **kwargs):
+                elems = [str(arg) for arg in args]
+                elems += [
+                    "{}={}".format(str(key), str(value))
+                    for key, value in kwargs.items()
+                ]
+
+                return ", ".join(elems)
+
             def __call__(self, *args, **kwargs):
                 res = self._function(*args, **kwargs)
-                return BooleanResult(res, self._msg, str(*args) + str(**kwargs))
+                argument_str = self._build_argument_str(*args, **kwargs)
+                return BooleanResult(res, self._msg, argument_str)
 
         return Wrapper(function, msg)
 
