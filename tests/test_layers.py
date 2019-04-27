@@ -25,6 +25,10 @@ from . import data
 
 
 class TestLayers(unittest.TestCase):
+    def assertEqualSnapshots(self, first, second):
+        self.assertEqual(first.heroes, second.heroes)
+        self.assertEqual(sorted(first.villains), sorted(second.villains))
+
     def test_layers_named_dict_disjoint_push(self):
         schema = data.hero.build_schema()
 
@@ -86,7 +90,9 @@ class TestLayers(unittest.TestCase):
         combined_config = configsuite.ConfigSuite(combined, schema)
         self.assertTrue(combined_config.valid)
 
-        self.assertEqual(combined_config.snapshot, hero_villains_config.snapshot)
+        self.assertEqualSnapshots(
+            combined_config.snapshot, hero_villains_config.snapshot
+        )
 
     def test_layers_named_dict_disjoint_init(self):
         schema = data.hero.build_schema()
@@ -174,7 +180,7 @@ class TestLayers(unittest.TestCase):
         combined_config = configsuite.ConfigSuite(combined, schema)
         self.assertTrue(combined_config.valid)
 
-        self.assertEqual(combined_config.snapshot, layered_config.snapshot)
+        self.assertEqualSnapshots(combined_config.snapshot, layered_config.snapshot)
 
     def test_invalid_layer(self):
         schema = data.hero.build_schema()
