@@ -151,15 +151,13 @@ class ConfigSuite(object):
 
         Pair = collections.namedtuple("KeyValuePair", ["key", "value"])
         return tuple(
-            sorted(
-                [
-                    Pair(
-                        self._build_snapshot(key, key_schema),
-                        self._build_snapshot(value, value_schema),
-                    )
-                    for key, value in config.items()
-                ]
-            )
+            [
+                Pair(
+                    self._build_snapshot(key, key_schema),
+                    self._build_snapshot(value, value_schema),
+                )
+                for key, value in config.items()
+            ]
         )
 
     def _build_snapshot(self, config, schema):
