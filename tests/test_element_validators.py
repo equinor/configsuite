@@ -45,7 +45,7 @@ class TestElementValidators(unittest.TestCase):
         err = config_suite.errors[0]
         self.assertIsInstance(err, configsuite.InvalidValueError)
         self.assertEqual((0, "name"), err.key_path)
-        self.assertEqual("Name should not be empty is false on input ", err.msg)
+        self.assertEqual("Name should not be empty is false on input ''", err.msg)
 
     def test_element_validator_double_fail(self):
         raw_config = data.candy_bag.build_config()
