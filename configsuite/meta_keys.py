@@ -26,6 +26,7 @@ class MetaKeys(enum.Enum):
     Item = "item"
     Required = "required"
     ElementValidators = "element_validators"
+    ContextValidators = "context_validators"
     Key = "key"
     Value = "value"
     Description = "description"

@@ -27,13 +27,20 @@ from .meta_keys import MetaKeys as MK
 
 
 class ConfigSuite(object):
-    def __init__(self, raw_config, schema, layers=()):
+    def __init__(
+        self,
+        raw_config,
+        schema,
+        layers=(),
+        extract_validation_context=lambda snapshot: None,
+    ):
         assert_valid_schema(schema)
         self._layers = tuple(
             [copy.deepcopy(layer) for layer in tuple(layers) + (raw_config,)]
         )
         self._cached_raw_config = None
         self._schema = copy.deepcopy(schema)
+        self._extract_validation_context = extract_validation_context
         self._snapshot = None
         self._valid = None
         self._errors = None
@@ -63,6 +70,10 @@ class ConfigSuite(object):
             self._snapshot = self._build_snapshot(self._raw_config, self._schema)
 
         return self._snapshot
+
+    @property
+    def _context(self):
+        return self._extract_validation_context(self.snapshot)
 
     def push(self, raw_config):
         return ConfigSuite(raw_config, self._schema, self._layers)
@@ -209,7 +220,7 @@ class ConfigSuite(object):
             return
 
         validator = configsuite.Validator(self._schema)
-        val_res = validator.validate(self._raw_config)
+        val_res = validator.validate(self._raw_config, self._context)
         self._valid &= val_res.valid
         self._errors += val_res.errors
 
