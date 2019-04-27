@@ -30,11 +30,13 @@ class Validator(object):
         self._schema = schema
         self._errors = None
         self._key_stack = None
+        self._context = None
         self._stop_condition = stop_condition
 
-    def validate(self, config):
+    def validate(self, config, context=None):
         self._errors = []
         self._key_stack = _KeyStack()
+        self._context = context
         valid = self._validate(config, self._schema)
         return ValidationResult(valid=valid, errors=tuple(self._errors))
 
@@ -62,6 +64,9 @@ class Validator(object):
         if valid:
             valid &= self._element_validation(config, schema)
 
+        if valid:
+            valid &= self._context_validation(config, schema)
+
         return bool(valid)
 
     def _element_validation(self, config, schema):
@@ -70,6 +75,18 @@ class Validator(object):
         valid = True
         for val in elem_vals:
             res = val(config)
+            if not res:
+                valid = False
+                self._add_invalid_value_error(res.msg)
+
+        return valid
+
+    def _context_validation(self, config, schema):
+        context_validators = schema.get(MK.ContextValidators, ())
+
+        valid = True
+        for validator in context_validators:
+            res = validator(config, self._context)
             if not res:
                 valid = False
                 self._add_invalid_value_error(res.msg)
