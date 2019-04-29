@@ -49,6 +49,7 @@ _META_SCHEMA = {
             MK.Required: False,
             MK.Content: {MK.Item: {MK.Type: types.Callable}},
         },
+        MK.Transformation: {MK.Type: types.Callable, MK.Required: False},
     },
 }
 

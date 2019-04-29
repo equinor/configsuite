@@ -24,3 +24,4 @@ from . import candy_bag
 from . import candidate
 from . import hero
 from . import transactions
+from . import templating

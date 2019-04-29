@@ -53,6 +53,28 @@ class BooleanResult(object):
         return fmt.format(bool(self), self._msg, self._input)
 
 
+def transformation_msg(msg):
+    """Used to decorate a transformation function with a msg.
+    """
+
+    def real_decorator(function):
+        class Wrapper(object):
+            def __init__(self, function, msg):
+                self._function = function
+                self._msg = msg
+
+            @property
+            def msg(self):
+                return self._msg
+
+            def __call__(self, *args, **kwargs):
+                return self._function(*args, **kwargs)
+
+        return Wrapper(function, msg)
+
+    return real_decorator
+
+
 def validator_msg(msg):
     """Validator decorator wraps return value in a message container.
 
