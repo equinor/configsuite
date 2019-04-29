@@ -36,6 +36,7 @@ from configsuite.types import (
     Dict,
     NamedDict,
     validator_msg,
+    transformation_msg,
 )
 from configsuite.validation_errors import (
     ValidationError,
@@ -43,6 +44,7 @@ from configsuite.validation_errors import (
     MissingKeyError,
     UnknownKeyError,
     InvalidValueError,
+    TransformationError,
 )
 from configsuite.validator import Validator
 from configsuite.config import ConfigSuite

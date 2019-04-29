@@ -71,3 +71,7 @@ class InvalidValueError(ValidationError):
 
 class InvalidTypeError(ValidationError):
     pass
+
+
+class TransformationError(ValidationError):
+    pass

@@ -90,12 +90,17 @@ class ConfigSuite(object):
             raise AssertionError(err_msg)
 
         if self._cached_raw_config is None:
-            self._cached_raw_config = self._build_raw_config(self._layers, self._schema)
+            raw_config = self._build_raw_config(self._layers, self._schema)
+            transformed_raw_config = self._apply_transformations(
+                raw_config, self._schema, ()
+            )
+            self._cached_raw_config = transformed_raw_config
 
         return self._cached_raw_config
 
     def _build_raw_config(self, layers, schema):
         data_type = schema[MK.Type]
+
         if isinstance(data_type, configsuite.types.BasicType):
             return layers[-1]
         elif data_type == configsuite.types.List:
@@ -137,6 +142,57 @@ class ConfigSuite(object):
         else:
             msg = "Encountered unknown type {} while building raw config"
             raise TypeError(msg.format(str(data_type)))
+
+    def _apply_transformations(self, raw_config, schema, key_path):
+        at = self._apply_transformations
+        data_type = schema[MK.Type]
+
+        if isinstance(data_type, configsuite.types.BasicType):
+            return_value = raw_config
+        elif data_type == configsuite.types.List:
+            item_schema = schema[MK.Content][MK.Item]
+            return_value = tuple(
+                [
+                    at(item, item_schema, key_path + (idx,))
+                    for idx, item in enumerate(raw_config)
+                ]
+            )
+        elif data_type == configsuite.types.NamedDict:
+            content_schema = schema[MK.Content]
+            return_value = {}
+            for key, value in raw_config.items():
+                if key not in content_schema:
+                    return_value[key] = value
+                    continue
+
+                return_value[key] = at(value, content_schema[key], key_path + (key,))
+        elif data_type == configsuite.types.Dict:
+            key_schema = schema[MK.Content][MK.Key]
+            value_schema = schema[MK.Content][MK.Value]
+            return_value = {
+                at(key, key_schema, key_path + (key,)): at(
+                    value, value_schema, key_path + (key,)
+                )
+                for key, value in raw_config.items()
+            }
+        else:
+            msg = "Encountered unknown type {} while building raw config"
+            raise TypeError(msg.format(str(data_type)))
+
+        if MK.Transformation not in schema:
+            return return_value
+
+        transformation = schema[MK.Transformation]
+        try:
+            return_value = transformation(return_value)
+        # pylint: disable=broad-except
+        except Exception as e:
+            error_fmt = "'{}' failed on input '{}' with error '{}'"
+            error_msg = error_fmt.format(transformation.msg, return_value, str(e))
+            self._errors += (configsuite.TransformationError(error_msg, key_path),)
+            self._valid = False
+
+        return return_value
 
     def _build_named_dict_snapshot(self, config, schema):
         data_type = schema[MK.Type]

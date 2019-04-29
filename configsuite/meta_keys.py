@@ -30,3 +30,4 @@ class MetaKeys(enum.Enum):
     Key = "key"
     Value = "value"
     Description = "description"
+    Transformation = "transformation"
