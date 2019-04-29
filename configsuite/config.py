@@ -47,9 +47,6 @@ class ConfigSuite(object):
 
     @property
     def errors(self):
-        if len(self._layers) == 1 and self.readable:
-            return tuple([err for err in self._errors if err.layer is None])
-
         return self._errors
 
     @property
@@ -182,32 +179,6 @@ class ConfigSuite(object):
             msg = "Encountered unknown type {} while building snapshot"
             raise TypeError(msg.format(str(data_type)))
 
-    def _validate_layers(self):
-        validator = configsuite.Validator(self._schema)
-
-        errors = []
-        for idx, layer in enumerate(self._layers):
-            val_res = validator.validate(layer)
-            errors += [error.create_layer_error(idx) for error in val_res.errors]
-
-        def _not_dict(schema):
-            dict_types = (configsuite.types.Dict, configsuite.types.NamedDict)
-            return schema[MK.Type] not in dict_types
-
-        dict_validator = configsuite.Validator(self._schema, stop_condition=_not_dict)
-        dict_missing_errors = []
-        for idx, layer in enumerate(self._layers):
-            val_res = dict_validator.validate(layer)
-            dict_missing_errors += [
-                error.create_layer_error(idx)
-                for error in val_res.errors
-                if isinstance(error, configsuite.MissingKeyError)
-            ]
-
-        errors = tuple(set(errors) - set(dict_missing_errors))
-        self._valid &= len(errors) == 0
-        self._errors += tuple(errors)
-
     def _validate_readability(self):
         readable_errors = (configsuite.UnknownKeyError, configsuite.MissingKeyError)
 
@@ -238,8 +209,6 @@ class ConfigSuite(object):
         self._validate_readability()
         if not self.readable:
             return
-
-        self._validate_layers()
 
         validator = configsuite.Validator(self._schema)
         val_res = validator.validate(self._raw_config)

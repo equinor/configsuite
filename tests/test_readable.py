@@ -42,6 +42,7 @@ class TestReadable(unittest.TestCase):
         layered_config = configsuite.ConfigSuite(heroes, schema, layers=(villains,))
         self.assertFalse(layered_config.readable)
         self.assertFalse(layered_config.valid)
+        self.assertTrue(all([err.layer is not None for err in layered_config.errors]))
 
     def test_readable_not_valid(self):
         schema = data.hero.build_schema()
