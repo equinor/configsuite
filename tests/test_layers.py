@@ -210,10 +210,7 @@ class TestLayers(unittest.TestCase):
         )
         self.assertTrue(layered_config.readable)
         self.assertFalse(layered_config.valid)
-        layer_errors = [
-            error for error in layered_config.errors if error.layer is not None
-        ]
-        self.assertTrue(len(layer_errors) > 0)
+        self.assertTrue(len(layered_config.errors) > 0)
 
         combined = {
             "heroes": [{"name": "Batman"}, {"name": "Batman", "strength": 10}],
