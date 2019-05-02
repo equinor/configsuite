@@ -20,6 +20,7 @@ in all copies or substantial portions of the Software.
 import collections
 import numbers
 import datetime
+import six
 
 
 class BooleanResult(object):
@@ -120,7 +121,7 @@ def _is_list(x):
 
 @validator_msg("Is x a string")
 def _is_string(x):
-    return isinstance(x, str)
+    return isinstance(x, six.string_types)
 
 
 @validator_msg("Is x an integer")

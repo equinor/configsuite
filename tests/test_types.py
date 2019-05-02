@@ -19,6 +19,7 @@ in all copies or substantial portions of the Software.
 import datetime
 import numbers
 import unittest
+import six
 
 import configsuite
 
@@ -80,12 +81,12 @@ class TestTypes(unittest.TestCase):
             self.assertEqual(("pet",), err.key_path)
 
     def test_string(self):
-        for strval in ["fdnsjk", "", "str4thewin", True, [], 1, 1.2, {}, None]:
+        for strval in ["fdnsjk", "", "str4thewin", u"ustr", True, [], 1, 1.2, {}, None]:
             raw_config = data.pets.build_config()
             raw_config["name"] = strval
             config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
 
-            if isinstance(strval, str):
+            if isinstance(strval, six.string_types):
                 self.assertTrue(config_suite.valid)
                 self.assertEqual(strval, config_suite.snapshot.name)
                 self.assertEqual(0, len(config_suite.errors))
