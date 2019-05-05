@@ -127,6 +127,19 @@ class TestTransformations(unittest.TestCase):
             templating.template_results_no_definitions()[-3:], suite.snapshot
         )
 
+    def test_transformation_non_readable_results(self):
+        raw_config = templating.build_config_no_definitions()
+
+        @configsuite.transformation_msg("Deforming elements")
+        def _deformer(elem):
+            return {"unexpected_nesting": elem}
+
+        schema = templating.build_schema_no_definitions()
+        schema[MK.Transformation] = _deformer
+
+        suite = configsuite.ConfigSuite(raw_config, schema)
+        self.assertFalse(suite.readable, suite.errors)
+
     def test_transformation_nameddict(self):
         schema = favourite_numbers.build_schema()
         schema[MK.Transformation] = _sort_favourites
