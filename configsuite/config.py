@@ -50,9 +50,7 @@ class ConfigSuite(object):
         self._valid = True
         self._errors = ()
 
-        self._validate_readability(self._layers)
-        if self._readable:
-            self._cached_merged_config = self._build_merged_config()
+        self._cached_merged_config = self._build_merged_config()
         if self._readable:
             self._validate_final()
         self._assert_state()
@@ -103,10 +101,22 @@ class ConfigSuite(object):
         return self._cached_merged_config
 
     def _build_merged_config(self):
-        assert self.readable
+        # Apply layer transformations
+        layers = tuple(
+            [
+                self._apply_transformations(
+                    layer, self._schema, (), MK.LayerTransformation, ()
+                )
+                for layer in self._layers
+            ]
+        )
+
+        self._validate_readability(layers)
+        if not self.readable:
+            return None
 
         # Build initial merged config
-        merged_config = self._build_initial_merged_config(self._layers, self._schema)
+        merged_config = self._build_initial_merged_config(layers, self._schema)
 
         # Apply transformations
         merged_config = self._apply_transformations(
@@ -181,68 +191,87 @@ class ConfigSuite(object):
 
     def _apply_transformations(
         self,
-        merged_config,
+        config,
         schema,
         key_path,
         transformation_type,
         transformation_context,
+        bottom_up=True,
     ):
-        def rec(merged_config, schema, key_path):
+        def rec(config, schema, key_path):
             return self._apply_transformations(
-                merged_config,
-                schema,
-                key_path,
-                transformation_type,
-                transformation_context,
+                config, schema, key_path, transformation_type, transformation_context
+            )
+
+        if not bottom_up:
+            config = self._apply_single_transformation(
+                config, schema, transformation_type, transformation_context, key_path
             )
 
         data_type = schema[MK.Type]
-
+        recurse = data_type.validate(config)
         if isinstance(data_type, configsuite.types.BasicType):
-            return_value = merged_config
+            return_value = config
         elif data_type == configsuite.types.List:
-            item_schema = schema[MK.Content][MK.Item]
-            return_value = tuple(
-                [
-                    rec(item, item_schema, key_path + (idx,))
-                    for idx, item in enumerate(merged_config)
-                ]
-            )
+            if recurse:
+                item_schema = schema[MK.Content][MK.Item]
+                config = tuple(
+                    [
+                        rec(item, item_schema, key_path + (idx,))
+                        for idx, item in enumerate(config)
+                    ]
+                )
         elif data_type == configsuite.types.NamedDict:
-            content_schema = schema[MK.Content]
-            return_value = {}
-            for key, value in merged_config.items():
-                if key not in content_schema:
-                    return_value[key] = value
-                    continue
+            if recurse:
+                content_schema = schema[MK.Content]
+                return_value = {}
+                for key, value in config.items():
+                    if key not in content_schema:
+                        return_value[key] = value
+                        continue
 
-                return_value[key] = rec(value, content_schema[key], key_path + (key,))
+                    return_value[key] = rec(
+                        value, content_schema[key], key_path + (key,)
+                    )
+                config = return_value
         elif data_type == configsuite.types.Dict:
-            key_schema = schema[MK.Content][MK.Key]
-            value_schema = schema[MK.Content][MK.Value]
-            return_value = {}
-            for key, value in merged_config.items():
-                ret_key = rec(key, key_schema, key_path + (key,))
-                ret_val = rec(value, value_schema, key_path + (key,))
-                return_value[ret_key] = ret_val
+            if recurse:
+                key_schema = schema[MK.Content][MK.Key]
+                value_schema = schema[MK.Content][MK.Value]
+                return_value = {}
+                for key, value in config.items():
+                    ret_key = rec(key, key_schema, key_path + (key,))
+                    ret_val = rec(value, value_schema, key_path + (key,))
+                    return_value[ret_key] = ret_val
+                config = return_value
         else:
             msg = "Encountered unknown type {} while building raw config"
             raise TypeError(msg.format(str(data_type)))
 
+        if bottom_up:
+            return self._apply_single_transformation(
+                config, schema, transformation_type, transformation_context, key_path
+            )
+        else:
+            return config
+
+    def _apply_single_transformation(
+        self, config, schema, transformation_type, transformation_context, key_path
+    ):
         if transformation_type not in schema:
-            return return_value
+            return config
 
         transformation = schema[transformation_type]
         try:
-            return transformation(return_value, *transformation_context)
+            return transformation(config, *transformation_context)
         # pylint: disable=broad-except
         except Exception as e:
             error_fmt = "'{}' failed on input '{}' with error '{}'"
-            error_msg = error_fmt.format(transformation.msg, return_value, str(e))
+            error_msg = error_fmt.format(transformation.msg, config, str(e))
             self._errors += (configsuite.TransformationError(error_msg, key_path),)
             self._valid = False
 
-        return return_value
+        return config
 
     def _build_named_dict_snapshot(self, config, schema):
         data_type = schema[MK.Type]
