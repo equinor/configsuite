@@ -38,14 +38,21 @@ class ConfigSuite(object):
         self._layers = tuple(
             [copy.deepcopy(layer) for layer in tuple(layers) + (raw_config,)]
         )
-        self._cached_raw_config = None
         self._schema = copy.deepcopy(schema)
         self._extract_validation_context = extract_validation_context
+
         self._snapshot = None
-        self._valid = None
-        self._errors = None
-        self._readable = None
-        self._validate()
+        self._cached_merged_config = None
+
+        self._readable = True
+        self._valid = True
+        self._errors = ()
+
+        self._validate_readability(self._layers)
+        if self._readable:
+            self._build_cached_merged_config()
+        if self._readable:
+            self._validate_final()
         self._assert_state()
 
     @property
@@ -67,7 +74,7 @@ class ConfigSuite(object):
             raise AssertionError(err_msg)
 
         if self._snapshot is None:
-            self._snapshot = self._build_snapshot(self._raw_config, self._schema)
+            self._snapshot = self._build_snapshot(self._merged_config, self._schema)
 
         return self._snapshot
 
@@ -79,26 +86,32 @@ class ConfigSuite(object):
         return ConfigSuite(raw_config, self._schema, self._layers)
 
     @property
-    def _raw_config(self):
-        """The raw config cannot be built and will also not be utilized if the
+    def _merged_config(self):
+        """The merged config cannot be built and will also not be utilized if the
         config is not readable. Due to this it is built lazily.
         """
         if not self.readable:
-            err_msg = (
-                "Internal error: Cannot build raw_config of unreadable configuration."
-            )
+            err_msg = "Internal error: Cannot build merged_config of unreadable configuration."
             raise AssertionError(err_msg)
 
-        if self._cached_raw_config is None:
-            raw_config = self._build_raw_config(self._layers, self._schema)
-            transformed_raw_config = self._apply_transformations(
-                raw_config, self._schema, ()
-            )
-            self._cached_raw_config = transformed_raw_config
+        if self._cached_merged_config is None:
+            err_msg = "Internal error: Merged config cannot be accessed before cache is built."
+            raise AssertionError(err_msg)
 
-        return self._cached_raw_config
+        return self._cached_merged_config
 
-    def _build_raw_config(self, layers, schema):
+    def _build_cached_merged_config(self):
+        self._cached_merged_config = self._build_merged_config(
+            self._layers, self._schema
+        )
+        self._cached_merged_config = self._apply_transformations(
+            self._cached_merged_config, self._schema, ()
+        )
+        self._validate_readability((self._cached_merged_config,))
+        if not self.readable:
+            self._cached_merged_config = None
+
+    def _build_merged_config(self, layers, schema):
         data_type = schema[MK.Type]
 
         if isinstance(data_type, configsuite.types.BasicType):
@@ -108,7 +121,7 @@ class ConfigSuite(object):
             config = []
             for layer in layers:
                 config += [
-                    self._build_raw_config((item,), item_schema) for item in layer
+                    self._build_merged_config((item,), item_schema) for item in layer
                 ]
             return tuple(config)
         elif data_type == configsuite.types.NamedDict:
@@ -121,7 +134,7 @@ class ConfigSuite(object):
                     continue
 
                 if key in content_schema:
-                    config[key] = self._build_raw_config(
+                    config[key] = self._build_merged_config(
                         child_layers, content_schema[key]
                     )
                 else:
@@ -135,7 +148,7 @@ class ConfigSuite(object):
                 child_layers = tuple([layer[key] for layer in layers if key in layer])
                 if len(child_layers) == 0:
                     continue
-                config[key] = self._build_raw_config(
+                config[key] = self._build_merged_config(
                     child_layers, content_schema[MK.Value]
                 )
             return config
@@ -143,24 +156,24 @@ class ConfigSuite(object):
             msg = "Encountered unknown type {} while building raw config"
             raise TypeError(msg.format(str(data_type)))
 
-    def _apply_transformations(self, raw_config, schema, key_path):
+    def _apply_transformations(self, merged_config, schema, key_path):
         at = self._apply_transformations
         data_type = schema[MK.Type]
 
         if isinstance(data_type, configsuite.types.BasicType):
-            return_value = raw_config
+            return_value = merged_config
         elif data_type == configsuite.types.List:
             item_schema = schema[MK.Content][MK.Item]
             return_value = tuple(
                 [
                     at(item, item_schema, key_path + (idx,))
-                    for idx, item in enumerate(raw_config)
+                    for idx, item in enumerate(merged_config)
                 ]
             )
         elif data_type == configsuite.types.NamedDict:
             content_schema = schema[MK.Content]
             return_value = {}
-            for key, value in raw_config.items():
+            for key, value in merged_config.items():
                 if key not in content_schema:
                     return_value[key] = value
                     continue
@@ -173,7 +186,7 @@ class ConfigSuite(object):
                 at(key, key_schema, key_path + (key,)): at(
                     value, value_schema, key_path + (key,)
                 )
-                for key, value in raw_config.items()
+                for key, value in merged_config.items()
             }
         else:
             msg = "Encountered unknown type {} while building raw config"
@@ -244,7 +257,7 @@ class ConfigSuite(object):
             msg = "Encountered unknown type {} while building snapshot"
             raise TypeError(msg.format(str(data_type)))
 
-    def _validate_readability(self):
+    def _validate_readability(self, layers):
         readable_errors = (configsuite.UnknownKeyError, configsuite.MissingKeyError)
 
         def _not_container(schema):
@@ -254,7 +267,7 @@ class ConfigSuite(object):
             self._schema, stop_condition=_not_container
         )
         container_errors = []
-        for idx, layer in enumerate(self._layers):
+        for idx, layer in enumerate(layers):
             val_res = container_validator.validate(layer)
             container_errors += [
                 error.create_layer_error(idx)
@@ -266,17 +279,12 @@ class ConfigSuite(object):
         self._valid &= self._readable
         self._errors += tuple(container_errors)
 
-    def _validate(self):
-        self._valid = True
-        self._readable = True
-        self._errors = ()
-
-        self._validate_readability()
-        if not self.readable:
-            return
+    def _validate_final(self):
+        assert self.readable
+        self._assert_state()
 
         validator = configsuite.Validator(self._schema)
-        val_res = validator.validate(self._raw_config, self._context)
+        val_res = validator.validate(self._merged_config, self._context)
         self._valid &= val_res.valid
         self._errors += val_res.errors
 
