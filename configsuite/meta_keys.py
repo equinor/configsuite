@@ -32,3 +32,4 @@ class MetaKeys(enum.Enum):
     Description = "description"
     Transformation = "transformation"
     ContextTransformation = "context_transformation"
+    LayerTransformation = "layer_transformation"
