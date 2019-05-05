@@ -31,3 +31,4 @@ class MetaKeys(enum.Enum):
     Value = "value"
     Description = "description"
     Transformation = "transformation"
+    ContextTransformation = "context_transformation"
