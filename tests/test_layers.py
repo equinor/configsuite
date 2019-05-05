@@ -58,7 +58,9 @@ class TestLayers(unittest.TestCase):
         combined_config = configsuite.ConfigSuite(combined, schema)
         self.assertTrue(combined_config.valid)
 
-        self.assertEqual(combined_config.snapshot, hero_villains_config.snapshot)
+        self.assertEqualSnapshots(
+            combined_config.snapshot, hero_villains_config.snapshot
+        )
 
     def test_layers_named_dict_intersection_push(self):
         schema = data.hero.build_schema()
@@ -121,7 +123,7 @@ class TestLayers(unittest.TestCase):
         combined_config = configsuite.ConfigSuite(combined, schema)
         self.assertTrue(combined_config.valid)
 
-        self.assertEqual(combined_config.snapshot, layered_config.snapshot)
+        self.assertEqualSnapshots(combined_config.snapshot, layered_config.snapshot)
 
     def test_layers_named_dict_intersection_init(self):
         schema = data.hero.build_schema()
@@ -151,7 +153,7 @@ class TestLayers(unittest.TestCase):
         combined_config = configsuite.ConfigSuite(combined, schema)
         self.assertTrue(combined_config.valid)
 
-        self.assertEqual(combined_config.snapshot, layered_config.snapshot)
+        self.assertEqualSnapshots(combined_config.snapshot, layered_config.snapshot)
 
     def test_layers_list_init(self):
         schema = data.hero.build_schema()
@@ -227,4 +229,4 @@ class TestLayers(unittest.TestCase):
         self.assertTrue(combined_config.readable)
         self.assertFalse(combined_config.valid)
 
-        self.assertEqual(combined_config.snapshot, layered_config.snapshot)
+        self.assertEqualSnapshots(combined_config.snapshot, layered_config.snapshot)
