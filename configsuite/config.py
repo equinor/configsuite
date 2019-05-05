@@ -43,12 +43,10 @@ class ConfigSuite(object):
         self._extract_validation_context = extract_validation_context
         self._extract_transformation_context = extract_transformation_context
 
-        self._snapshot = None
-        self._cached_merged_config = None
-
         self._readable = True
         self._valid = True
         self._errors = ()
+        self._snapshot = None
 
         self._cached_merged_config = self._build_merged_config()
         if self._readable:
@@ -101,53 +99,39 @@ class ConfigSuite(object):
         return self._cached_merged_config
 
     def _build_merged_config(self):
-        # Apply layer transformations
-        layers = tuple(
-            [
-                self._apply_transformations(
-                    layer, self._schema, (), MK.LayerTransformation, ()
-                )
-                for layer in self._layers
-            ]
-        )
+        layers = self._build_transformed_layers()
 
         self._validate_readability(layers)
         if not self.readable:
             return None
 
-        # Build initial merged config
         merged_config = self._build_initial_merged_config(layers, self._schema)
-
-        # Apply transformations
-        merged_config = self._apply_transformations(
-            merged_config, self._schema, (), MK.Transformation, ()
-        )
+        merged_config = self._apply_transformations(merged_config)
 
         self._validate_readability((merged_config,))
         if not self.readable:
             return None
 
-        # Apply context transformations
-        prelim_snapshot = self._build_snapshot(merged_config, self._schema)
-        try:
-            context = self._extract_transformation_context(prelim_snapshot)
-            extracted_context = True
-        # pylint: disable=broad-except
-        except Exception as e:
-            extracted_context = False
-            self._valid = False
-            self._errors += (configsuite.ContextExtractionError(str(e), ()),)
-
-        if extracted_context:
-            merged_config = self._apply_transformations(
-                merged_config, self._schema, (), MK.ContextTransformation, (context,)
-            )
+        merged_config = self._apply_context_transformations(merged_config)
 
         self._validate_readability((merged_config,))
         if not self.readable:
             return None
 
         return merged_config
+
+    def _build_transformed_layers(self):
+        layer_transformer = configsuite.Transformer(
+            self._schema, MK.LayerTransformation, (), bottom_up=False
+        )
+        layers = []
+        for layer in self._layers:
+            trans_layer = layer_transformer.transform(layer)
+            self._errors += trans_layer.errors
+            layers.append(trans_layer.result)
+
+        self._valid &= len(self._errors) == 0
+        return layers
 
     def _build_initial_merged_config(self, layers, schema):
         rec = self._build_initial_merged_config
@@ -189,89 +173,30 @@ class ConfigSuite(object):
             msg = "Encountered unknown type {} while building raw config"
             raise TypeError(msg.format(str(data_type)))
 
-    def _apply_transformations(
-        self,
-        config,
-        schema,
-        key_path,
-        transformation_type,
-        transformation_context,
-        bottom_up=True,
-    ):
-        def rec(config, schema, key_path):
-            return self._apply_transformations(
-                config, schema, key_path, transformation_type, transformation_context
-            )
+    def _apply_transformations(self, config):
+        transformer = configsuite.Transformer(self._schema, MK.Transformation, ())
+        trans_res = transformer.transform(config)
+        self._errors += trans_res.errors
+        self._valid &= len(trans_res.errors) == 0
+        return trans_res.result
 
-        if not bottom_up:
-            config = self._apply_single_transformation(
-                config, schema, transformation_type, transformation_context, key_path
-            )
-
-        data_type = schema[MK.Type]
-        recurse = data_type.validate(config)
-        if isinstance(data_type, configsuite.types.BasicType):
-            return_value = config
-        elif data_type == configsuite.types.List:
-            if recurse:
-                item_schema = schema[MK.Content][MK.Item]
-                config = tuple(
-                    [
-                        rec(item, item_schema, key_path + (idx,))
-                        for idx, item in enumerate(config)
-                    ]
-                )
-        elif data_type == configsuite.types.NamedDict:
-            if recurse:
-                content_schema = schema[MK.Content]
-                return_value = {}
-                for key, value in config.items():
-                    if key not in content_schema:
-                        return_value[key] = value
-                        continue
-
-                    return_value[key] = rec(
-                        value, content_schema[key], key_path + (key,)
-                    )
-                config = return_value
-        elif data_type == configsuite.types.Dict:
-            if recurse:
-                key_schema = schema[MK.Content][MK.Key]
-                value_schema = schema[MK.Content][MK.Value]
-                return_value = {}
-                for key, value in config.items():
-                    ret_key = rec(key, key_schema, key_path + (key,))
-                    ret_val = rec(value, value_schema, key_path + (key,))
-                    return_value[ret_key] = ret_val
-                config = return_value
-        else:
-            msg = "Encountered unknown type {} while building raw config"
-            raise TypeError(msg.format(str(data_type)))
-
-        if bottom_up:
-            return self._apply_single_transformation(
-                config, schema, transformation_type, transformation_context, key_path
-            )
-        else:
-            return config
-
-    def _apply_single_transformation(
-        self, config, schema, transformation_type, transformation_context, key_path
-    ):
-        if transformation_type not in schema:
-            return config
-
-        transformation = schema[transformation_type]
+    def _apply_context_transformations(self, config):
+        prelim_snapshot = self._build_snapshot(config, self._schema)
         try:
-            return transformation(config, *transformation_context)
+            context = self._extract_transformation_context(prelim_snapshot)
         # pylint: disable=broad-except
         except Exception as e:
-            error_fmt = "'{}' failed on input '{}' with error '{}'"
-            error_msg = error_fmt.format(transformation.msg, config, str(e))
-            self._errors += (configsuite.TransformationError(error_msg, key_path),)
             self._valid = False
+            self._errors += (configsuite.ContextExtractionError(str(e), ()),)
+            return config
 
-        return config
+        context_transformer = configsuite.Transformer(
+            self._schema, MK.ContextTransformation, (context,)
+        )
+        trans_res = context_transformer.transform(config)
+        self._errors += trans_res.errors
+        self._valid &= len(trans_res.errors) == 0
+        return trans_res.result
 
     def _build_named_dict_snapshot(self, config, schema):
         data_type = schema[MK.Type]
