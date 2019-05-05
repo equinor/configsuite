@@ -48,5 +48,6 @@ from configsuite.validation_errors import (
     ContextExtractionError,
 )
 from configsuite.validator import Validator
+from configsuite.transformer import Transformer
 from configsuite.config import ConfigSuite
 from configsuite import docs
