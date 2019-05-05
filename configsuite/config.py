@@ -33,6 +33,7 @@ class ConfigSuite(object):
         schema,
         layers=(),
         extract_validation_context=lambda snapshot: None,
+        extract_transformation_context=lambda snapshot: None,
     ):
         assert_valid_schema(schema)
         self._layers = tuple(
@@ -40,6 +41,7 @@ class ConfigSuite(object):
         )
         self._schema = copy.deepcopy(schema)
         self._extract_validation_context = extract_validation_context
+        self._extract_transformation_context = extract_transformation_context
 
         self._snapshot = None
         self._cached_merged_config = None
@@ -50,7 +52,7 @@ class ConfigSuite(object):
 
         self._validate_readability(self._layers)
         if self._readable:
-            self._build_cached_merged_config()
+            self._cached_merged_config = self._build_merged_config()
         if self._readable:
             self._validate_final()
         self._assert_state()
@@ -79,7 +81,7 @@ class ConfigSuite(object):
         return self._snapshot
 
     @property
-    def _context(self):
+    def _validation_context(self):
         return self._extract_validation_context(self.snapshot)
 
     def push(self, raw_config):
@@ -100,18 +102,45 @@ class ConfigSuite(object):
 
         return self._cached_merged_config
 
-    def _build_cached_merged_config(self):
-        self._cached_merged_config = self._build_merged_config(
-            self._layers, self._schema
-        )
-        self._cached_merged_config = self._apply_transformations(
-            self._cached_merged_config, self._schema, ()
-        )
-        self._validate_readability((self._cached_merged_config,))
-        if not self.readable:
-            self._cached_merged_config = None
+    def _build_merged_config(self):
+        assert self.readable
 
-    def _build_merged_config(self, layers, schema):
+        # Build initial merged config
+        merged_config = self._build_initial_merged_config(self._layers, self._schema)
+
+        # Apply transformations
+        merged_config = self._apply_transformations(
+            merged_config, self._schema, (), MK.Transformation, ()
+        )
+
+        self._validate_readability((merged_config,))
+        if not self.readable:
+            return None
+
+        # Apply context transformations
+        prelim_snapshot = self._build_snapshot(merged_config, self._schema)
+        try:
+            context = self._extract_transformation_context(prelim_snapshot)
+            extracted_context = True
+        # pylint: disable=broad-except
+        except Exception as e:
+            extracted_context = False
+            self._valid = False
+            self._errors += (configsuite.ContextExtractionError(str(e), ()),)
+
+        if extracted_context:
+            merged_config = self._apply_transformations(
+                merged_config, self._schema, (), MK.ContextTransformation, (context,)
+            )
+
+        self._validate_readability((merged_config,))
+        if not self.readable:
+            return None
+
+        return merged_config
+
+    def _build_initial_merged_config(self, layers, schema):
+        rec = self._build_initial_merged_config
         data_type = schema[MK.Type]
 
         if isinstance(data_type, configsuite.types.BasicType):
@@ -120,9 +149,7 @@ class ConfigSuite(object):
             item_schema = schema[MK.Content][MK.Item]
             config = []
             for layer in layers:
-                config += [
-                    self._build_merged_config((item,), item_schema) for item in layer
-                ]
+                config += [rec((item,), item_schema) for item in layer]
             return tuple(config)
         elif data_type == configsuite.types.NamedDict:
             content_schema = schema[MK.Content]
@@ -134,9 +161,7 @@ class ConfigSuite(object):
                     continue
 
                 if key in content_schema:
-                    config[key] = self._build_merged_config(
-                        child_layers, content_schema[key]
-                    )
+                    config[key] = rec(child_layers, content_schema[key])
                 else:
                     config[key] = child_layers[-1]
             return config
@@ -148,16 +173,29 @@ class ConfigSuite(object):
                 child_layers = tuple([layer[key] for layer in layers if key in layer])
                 if len(child_layers) == 0:
                     continue
-                config[key] = self._build_merged_config(
-                    child_layers, content_schema[MK.Value]
-                )
+                config[key] = rec(child_layers, content_schema[MK.Value])
             return config
         else:
             msg = "Encountered unknown type {} while building raw config"
             raise TypeError(msg.format(str(data_type)))
 
-    def _apply_transformations(self, merged_config, schema, key_path):
-        at = self._apply_transformations
+    def _apply_transformations(
+        self,
+        merged_config,
+        schema,
+        key_path,
+        transformation_type,
+        transformation_context,
+    ):
+        def rec(merged_config, schema, key_path):
+            return self._apply_transformations(
+                merged_config,
+                schema,
+                key_path,
+                transformation_type,
+                transformation_context,
+            )
+
         data_type = schema[MK.Type]
 
         if isinstance(data_type, configsuite.types.BasicType):
@@ -166,7 +204,7 @@ class ConfigSuite(object):
             item_schema = schema[MK.Content][MK.Item]
             return_value = tuple(
                 [
-                    at(item, item_schema, key_path + (idx,))
+                    rec(item, item_schema, key_path + (idx,))
                     for idx, item in enumerate(merged_config)
                 ]
             )
@@ -178,26 +216,25 @@ class ConfigSuite(object):
                     return_value[key] = value
                     continue
 
-                return_value[key] = at(value, content_schema[key], key_path + (key,))
+                return_value[key] = rec(value, content_schema[key], key_path + (key,))
         elif data_type == configsuite.types.Dict:
             key_schema = schema[MK.Content][MK.Key]
             value_schema = schema[MK.Content][MK.Value]
-            return_value = {
-                at(key, key_schema, key_path + (key,)): at(
-                    value, value_schema, key_path + (key,)
-                )
-                for key, value in merged_config.items()
-            }
+            return_value = {}
+            for key, value in merged_config.items():
+                ret_key = rec(key, key_schema, key_path + (key,))
+                ret_val = rec(value, value_schema, key_path + (key,))
+                return_value[ret_key] = ret_val
         else:
             msg = "Encountered unknown type {} while building raw config"
             raise TypeError(msg.format(str(data_type)))
 
-        if MK.Transformation not in schema:
+        if transformation_type not in schema:
             return return_value
 
-        transformation = schema[MK.Transformation]
+        transformation = schema[transformation_type]
         try:
-            return_value = transformation(return_value)
+            return transformation(return_value, *transformation_context)
         # pylint: disable=broad-except
         except Exception as e:
             error_fmt = "'{}' failed on input '{}' with error '{}'"
@@ -284,7 +321,7 @@ class ConfigSuite(object):
         self._assert_state()
 
         validator = configsuite.Validator(self._schema)
-        val_res = validator.validate(self._merged_config, self._context)
+        val_res = validator.validate(self._merged_config, self._validation_context)
         self._valid &= val_res.valid
         self._errors += val_res.errors
 

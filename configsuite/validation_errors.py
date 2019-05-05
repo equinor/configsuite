@@ -75,3 +75,7 @@ class InvalidTypeError(ValidationError):
 
 class TransformationError(ValidationError):
     pass
+
+
+class ContextExtractionError(ValidationError):
+    pass

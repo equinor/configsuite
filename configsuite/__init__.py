@@ -45,6 +45,7 @@ from configsuite.validation_errors import (
     UnknownKeyError,
     InvalidValueError,
     TransformationError,
+    ContextExtractionError,
 )
 from configsuite.validator import Validator
 from configsuite.config import ConfigSuite
