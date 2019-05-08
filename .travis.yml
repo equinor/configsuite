@@ -13,6 +13,10 @@ before_install:
 script:
     - python setup.py test
 
+after_success:
+- pip install coverage codacy-coverage
+- 'if [ ! -z "${CODACY_PROJECT_TOKEN}" ]; then coverage xml; python-codacy-coverage -r coverage.xml; fi'
+
 deploy:
     - provider: pypi
       distributions: sdist bdist_wheel
