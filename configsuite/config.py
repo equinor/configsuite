@@ -271,7 +271,9 @@ class ConfigSuite(object):
         self._errors += tuple(container_errors)
 
     def _validate_final(self):
-        assert self.readable
+        if not self.readable:
+            err_msg = "Internal error: Not readable when doing final validation"
+            raise AssertionError(err_msg)
         self._assert_state()
 
         validator = configsuite.Validator(self._schema)
