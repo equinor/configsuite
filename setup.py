@@ -25,15 +25,18 @@ setuptools.setup(
     packages=["configsuite", "configsuite.docs"],
     author="Software Innovation Bergen, Statoil ASA and TNO",
     use_scm_version={"write_to": "configsuite/_version.py"},
-    install_requires=['enum34==1.1.6 ; python_version<"3.4"'],
+    install_requires=[
+        "enum34 >= 1.0 ; python_version<'3.4'",
+        "six >= 1.0 ; python_version<'3'",
+    ],
     setup_requires=[
-        "pytest-runner",
-        "pytest-pylint",
         "setuptools_scm",
         "setuptools_scm_about",
     ],
     tests_require=[
         "pytest",
+        "pytest-runner",
+        "pytest-pylint",
         "black ; python_version>='3.6'",
         "click ; python_version>='3.6'",
         "pylint",
