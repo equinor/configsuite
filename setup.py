@@ -40,6 +40,7 @@ setuptools.setup(
         "black ; python_version>='3.6'",
         "click ; python_version>='3.6'",
         "pylint",
+        "pytest-cov",
         "jinja2",
     ],
     test_suite="tests",
