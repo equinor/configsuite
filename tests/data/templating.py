@@ -55,7 +55,7 @@ def _render(template, definitions=None):
     variables = copy.deepcopy(_VARIABLES)
     variables.update(definitions)
     jinja_env = jinja2.Environment(
-        variable_start_string=_VAR_START, variable_end_string=_VAR_END
+        variable_start_string=_VAR_START, variable_end_string=_VAR_END, autoescape=True
     )
 
     try:
