@@ -5,5 +5,6 @@
 [![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/042d23ea22084a1c8c7396edc6d1709f)](https://www.codacy.com/app/markusdregi/configsuite?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=equinor/configsuite&amp;utm_campaign=Badge_Grade)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/042d23ea22084a1c8c7396edc6d1709f)](https://www.codacy.com/app/markusdregi/configsuite?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=equinor/configsuite&amp;utm_campaign=Badge_Coverage)
+[![Requirements Status](https://requires.io/github/equinor/configsuite/requirements.svg?branch=master)](https://requires.io/github/equinor/configsuite/requirements/?branch=master)
 
 A configuration suite
