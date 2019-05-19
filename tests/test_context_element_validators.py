@@ -63,3 +63,34 @@ class TestContextValidators(unittest.TestCase):
         )
         self.assertFalse(config_suite.valid)
         self.assertEqual(1, len(config_suite.errors))
+
+    def test_context_validator_layers(self):
+        bottom_layer = transactions.build_config()
+        top_layer = {
+            "exchange_rates": {"gold": 4.39695731e6},
+            "transactions": ({"source": "NOK", "target": "gold", "amount": 0.5},),
+        }
+
+        suite = configsuite.ConfigSuite(
+            top_layer,
+            transactions.build_schema(),
+            layers=(bottom_layer,),
+            extract_validation_context=transactions.extract_validation_context,
+        )
+        self.assertTrue(suite.valid)
+
+    def test_context_validator_push(self):
+        bottom_layer = transactions.build_config()
+        top_layer = {
+            "exchange_rates": {"gold": 4.39695731e6},
+            "transactions": ({"source": "NOK", "target": "gold", "amount": 0.5},),
+        }
+
+        suite = configsuite.ConfigSuite(
+            bottom_layer,
+            transactions.build_schema(),
+            extract_validation_context=transactions.extract_validation_context,
+        )
+        layered_suite = suite.push(top_layer)
+
+        self.assertTrue(layered_suite.valid)

@@ -60,6 +60,27 @@ class TestContextTransformations(unittest.TestCase):
             suite.snapshot.templates,
         )
 
+    def test_context_transformation_push(self):
+        raw_config = templating.build_config_with_definitions()
+        top_layer = {"definitions": {"animal": "horse"}}
+        suite = configsuite.ConfigSuite(
+            raw_config,
+            templating.build_schema_with_definitions(),
+            extract_transformation_context=templating.extract_templating_context,
+        )
+
+        layered_suite = suite.push(top_layer)
+        self.assertTrue(layered_suite.valid, layered_suite.errors)
+        self.assertEqual(
+            tuple(
+                [
+                    line.replace("pig", "horse")
+                    for line in templating.template_results_with_definitions()
+                ]
+            ),
+            layered_suite.snapshot.templates,
+        )
+
     def test_context_transformation_exception(self):
         raw_config = templating.build_config_with_definitions()
 
