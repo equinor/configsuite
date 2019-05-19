@@ -144,7 +144,13 @@ class ConfigSuite(object):
         --------
         A new `ConfigSuite` with `raw_config` as the first layer.
         """
-        return ConfigSuite(raw_config, self._schema, self._layers)
+        return ConfigSuite(
+            raw_config,
+            self._schema,
+            layers=self._layers,
+            extract_validation_context=self._extract_validation_context,
+            extract_transformation_context=self._extract_transformation_context,
+        )
 
     @property
     def _merged_config(self):
