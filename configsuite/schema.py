@@ -69,7 +69,7 @@ def assert_valid_schema(schema):
     elif level_type == types.Dict:
         _assert_valid_dict_schema(schema)
     else:
-        raise AssertionError("Unknown base container: {}".format(schema))
+        raise TypeError("Unknown base container: {}".format(schema))
 
 
 def _assert_valid_schema_level(schema):
@@ -93,7 +93,9 @@ def _assert_valid_schema_level(schema):
             elif isinstance(error, configsuite.InvalidValueError):
                 raise ValueError(gen_err_msg(error))
             else:
-                raise Exception("Unknown validation error: {}".format(error))
+                raise AssertionError(
+                    "Internal error: Unknown validation error: {}".format(error)
+                )
 
 
 def _assert_dict_key(key):
