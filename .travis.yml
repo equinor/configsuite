@@ -6,12 +6,15 @@ python:
     - '3.5'
     - '3.6'
 
-before_install:
+install:
   - pip install -r requirements/travis-requirements.txt
   - pip install -r requirements/travis-test-requirements.txt
+  - pip install -r requirements/travis-docs-requirements.txt
 
 script:
     - python setup.py test
+    - python setup.py install
+    - python setup.py build_sphinx
 
 after_success:
 - pip install coverage codacy-coverage
