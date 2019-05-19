@@ -27,6 +27,40 @@ from .meta_keys import MetaKeys as MK
 
 
 class ConfigSuite(object):
+    """A `Suite` exposing the functionality of Config Suite in a unified manner.
+
+    The intended usage of Config Suite is via this immutable suite. It is constructed
+    with a `schema` describing the structure of a configuration, together with
+    a `raw_config` and possibly additional `layers`.
+
+    Parameters:
+    -----------
+    raw_config
+        The configuration taking precedence.
+    schema
+        A description of the structure of a valid configuration, together with
+        actions that are to be carried out.
+    layers: iterable of layers, optional
+        Additional layers of configuration. A layer takes precedence over all
+        other layers following it in the given sequence. Note that `raw_config`
+        takes precedence over all elements of `layers`.
+    extract_validation_context: callable, optional
+        Callable that extracts the context used for validation. The callable is
+        given a snapshot of the configuration as argument. Defaults to the
+        constant function always returning `None`.
+    extract_transformation_context: callable, optional
+        Callable that extracts the context used for transformations. The
+        callable is given a snapshot of the configuration as argument. Defaults
+        to the constant function always returning `None`.
+
+    Raises:
+    -------
+    TypeError, KeyError, ValueError
+        Approperiate errors are raised if provided with an invalid schema. Note
+        that errors are independent of `raw_config` and `layers` and hence not
+        user input responsive.
+    """
+
     def __init__(
         self,
         raw_config,
@@ -55,18 +89,32 @@ class ConfigSuite(object):
 
     @property
     def valid(self):
+        """A boolean indicating whether the resulting configuration was deemed
+        valid according to the schema."""
         return self._valid
 
     @property
     def errors(self):
+        """An iterable of `configsuite.errors` that occurred during validation. Is always
+        empty if `valid` is `True` and non-empty otherwise."""
         return self._errors
 
     @property
     def readable(self):
+        """A boolean indicating whether the resulting configuration was deemed
+        readable. Is always `True` if `valid` is `True`. For the consequences
+        of being readable, see the documentation of `snapshot`."""
         return self._readable
 
     @property
     def snapshot(self):
+        """A complete, immutable representation of the resulting configuration.
+
+        Raises:
+        -------
+        AssertionError
+            Raised on access if `suite` is not `readable`.
+        """
         if not self.readable:
             err_msg = "Cannot build snapshot of unreadable configuration."
             raise AssertionError(err_msg)
@@ -81,6 +129,21 @@ class ConfigSuite(object):
         return self._extract_validation_context(self.snapshot)
 
     def push(self, raw_config):
+        """Builds a new suite with `raw_config` on top of the current suite.
+
+        Builds a new suite with the same schema, but with `raw_config` on top
+        of the layers in the current suite.
+
+        Parameters:
+        -----------
+        raw_config:
+            A configuration that is to take precedence over all layers in the
+            current suite.
+
+        Returns:
+        --------
+        A new `ConfigSuite` with `raw_config` as the first layer.
+        """
         return ConfigSuite(raw_config, self._schema, self._layers)
 
     @property
