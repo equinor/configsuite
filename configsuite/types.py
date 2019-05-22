@@ -30,6 +30,13 @@ class BooleanResult(object):
     """
 
     def __init__(self, value, msg, indata):
+        if isinstance(value, BooleanResult):
+            value = bool(value)
+        if not isinstance(value, bool):
+            raise TypeError(
+                "Expected the type of value to be bool, was {}".format(type(value))
+            )
+
         self._value = value
         self._msg = str(msg)
         self._input = str(indata)
