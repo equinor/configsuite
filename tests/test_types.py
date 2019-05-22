@@ -216,3 +216,21 @@ class TestTypes(unittest.TestCase):
                 err = config_suite.errors[0]
                 self.assertIsInstance(err, configsuite.InvalidTypeError)
                 self.assertEqual(("pet", "timestamp"), err.key_path)
+
+    def test_booleanresult_equality(self):
+        for x, assert_func in zip((True, False), (self.assertTrue, self.assertFalse)):
+            res = configsuite.types.BooleanResult(x, "message", "input")
+            assert_func(res)
+            msg = "message is {} on input 'input'".format(str(x).lower())
+            self.assertEqual(res.msg, msg)
+
+            res_of_res = configsuite.types.BooleanResult(res, "message", "input")
+            assert_func(res_of_res)
+            msg = "message is {} on input 'input'".format(str(x).lower())
+            self.assertEqual(res_of_res.msg, msg)
+
+    def test_invalid_boolean_result_type(self):
+        elements = [1, 1.2, "dsa", {"test": 2}, [1, 2, 3], ("2", "3")]
+        for elem in elements:
+            with self.assertRaises(TypeError):
+                configsuite.types.BooleanResult(elem, "incorrect", "type")
