@@ -63,10 +63,7 @@ setuptools.setup(
         "enum34 >= 1.0 ; python_version<'3.4'",
         "six >= 1.0 ; python_version<'3'",
     ],
-    setup_requires=[
-        "setuptools_scm",
-        "setuptools_scm_about",
-    ],
+    setup_requires=["setuptools_scm", "setuptools_scm_about"],
     tests_require=[
         "pytest",
         "pytest-runner",
