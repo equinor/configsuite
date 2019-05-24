@@ -25,6 +25,14 @@ from configsuite import MetaKeys as MK
 from configsuite import types
 
 
+@types.validator_msg("Is x any type")
+def _is_anytype(_):
+    return True
+
+
+_Anytype = types.BasicType("_anytype", _is_anytype)
+
+
 @configsuite.validator_msg("AllowNone can only be used for BasicType")
 def _check_allownone_type(schema_level):
     if MK.AllowNone in schema_level:
@@ -41,14 +49,36 @@ def _check_allownone_required(schema_level):
     return True
 
 
+@configsuite.validator_msg("Default can only be used for BasicType")
+def _check_default_type(schema_level):
+    if MK.Default in schema_level:
+        return isinstance(schema_level[MK.Type], types.BasicType)
+    return True
+
+
+@configsuite.validator_msg("Default can not be Required")
+def _check_default_not_required(schema_level):
+    if isinstance(schema_level[MK.Type], types.BasicType):
+        has_default = schema_level.get(MK.Default, False)
+        if has_default:
+            return not schema_level.get(MK.Required, True)
+    return True
+
+
 _META_SCHEMA = {
     MK.Type: types.NamedDict,
-    MK.ElementValidators: (_check_allownone_type, _check_allownone_required),
+    MK.ElementValidators: (
+        _check_allownone_type,
+        _check_allownone_required,
+        _check_default_type,
+        _check_default_not_required,
+    ),
     MK.Content: {
         MK.Type: {MK.Type: types.Type},
         MK.Required: {MK.Type: types.Bool, MK.Required: False},
         MK.AllowNone: {MK.Type: types.Bool, MK.Required: False},
         MK.Description: {MK.Type: types.String, MK.Required: False},
+        MK.Default: {MK.Type: _Anytype, MK.Required: False},
         MK.ElementValidators: {
             MK.Type: types.List,
             MK.Required: False,
@@ -66,8 +96,8 @@ _META_SCHEMA = {
 }
 
 
-def assert_valid_schema(schema):
-    _assert_valid_schema_level(schema)
+def assert_valid_schema(schema, allow_default=False):
+    assert_valid_schema_level(schema, allow_default=allow_default)
 
     level_type = schema[MK.Type]
     if isinstance(level_type, types.BasicType):
@@ -82,10 +112,14 @@ def assert_valid_schema(schema):
         raise TypeError("Unknown base container: {}".format(schema))
 
 
-def _assert_valid_schema_level(schema):
+def assert_valid_schema_level(schema, allow_default):
     level_schema = copy.deepcopy(schema)
     if MK.Content in level_schema:
         level_schema.pop(MK.Content)
+
+    if MK.Default in schema and not allow_default:
+        fmt = "Default value is only allowed for contents in NamedDict"
+        raise ValueError(fmt)
 
     level_validator = configsuite.Validator(_META_SCHEMA)
     result = level_validator.validate(level_schema)
@@ -141,7 +175,7 @@ def _assert_valid_named_dict_schema(schema):
         _assert_dict_key(key)
 
     for value in content.values():
-        assert_valid_schema(value)
+        assert_valid_schema(value, allow_default=True)
 
 
 def _assert_valid_list_schema(schema):
@@ -162,7 +196,7 @@ def _assert_valid_list_schema(schema):
         )
         raise KeyError(err_msg)
 
-    assert_valid_schema(content[MK.Item])
+    assert_valid_schema(content[MK.Item], allow_default=False)
 
 
 def _assert_valid_dict_schema(schema):
@@ -184,5 +218,5 @@ def _assert_valid_dict_schema(schema):
         )
         raise KeyError(err_msg)
 
-    assert_valid_schema(content[MK.Key])
-    assert_valid_schema(content[MK.Value])
+    assert_valid_schema(content[MK.Key], allow_default=False)
+    assert_valid_schema(content[MK.Value], allow_default=False)

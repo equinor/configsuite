@@ -34,3 +34,4 @@ class MetaKeys(enum.Enum):
     ContextTransformation = "context_transformation"
     LayerTransformation = "layer_transformation"
     AllowNone = "allow_none"
+    Default = "default"

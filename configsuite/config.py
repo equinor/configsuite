@@ -212,9 +212,24 @@ class ConfigSuite(object):
         rec = self._build_initial_merged_config
         content_schema = schema[MK.Content]
         config = {}
-        all_keys = (key for layer in layers for key in layer.keys())
+        all_keys = set((key for layer in layers for key in layer.keys()))
+        keys_with_default = set(
+            key
+            for key, val in content_schema.items()
+            if MK.Default in val or val[MK.Type] == configsuite.types.NamedDict
+        )
+        all_keys.update(keys_with_default)
+
         for key in all_keys:
             child_layers = tuple([layer[key] for layer in layers if key in layer])
+            if key in content_schema:
+                if isinstance(
+                    content_schema[key][MK.Type], configsuite.types.BasicType
+                ):
+                    child_layers = (content_schema[key].get(MK.Default),) + child_layers
+                elif content_schema[key][MK.Type] == configsuite.types.NamedDict:
+                    child_layers = ({},) + child_layers
+
             if len(child_layers) == 0:
                 continue
 
@@ -222,6 +237,7 @@ class ConfigSuite(object):
                 config[key] = rec(child_layers, content_schema[key])
             else:
                 config[key] = child_layers[-1]
+
         return config
 
     def _build_initial_dict_merged_config(self, layers, schema):
