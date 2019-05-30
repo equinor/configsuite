@@ -24,7 +24,6 @@ from configsuite import MetaKeys as MK
 from configsuite import types
 
 from . import data
-from .data import transactions
 
 
 class TestSchemaValidation(unittest.TestCase):
@@ -100,19 +99,3 @@ class TestSchemaValidation(unittest.TestCase):
         schema[MK.Content]["dubious"] = "content"
         with self.assertRaises(KeyError):
             configsuite.ConfigSuite(raw_config, schema)
-
-    def test_context_validator_for_container(self):
-        raw_config = transactions.build_config()
-        schema = transactions.build_schema()
-
-        @configsuite.validator_msg("Given a context I'll accept anything")
-        def _tautology(*_):
-            return True
-
-        schema[MK.ContextValidators] = (_tautology,)
-        with self.assertRaises(ValueError):
-            configsuite.ConfigSuite(
-                raw_config,
-                schema,
-                extract_validation_context=transactions.extract_validation_context,
-            )

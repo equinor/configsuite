@@ -26,3 +26,4 @@ from . import hero
 from . import transactions
 from . import templating
 from . import numbers
+from . import special_numbers

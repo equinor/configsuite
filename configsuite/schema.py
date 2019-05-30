@@ -25,16 +25,8 @@ from configsuite import MetaKeys as MK
 from configsuite import types
 
 
-@configsuite.validator_msg("Collections cannot be context validated")
-def _context_basic_only(elem):
-    return not (
-        isinstance(elem[MK.Type], types.Collection) and MK.ContextValidators in elem
-    )
-
-
 _META_SCHEMA = {
     MK.Type: types.NamedDict,
-    MK.ElementValidators: (_context_basic_only,),
     MK.Content: {
         MK.Type: {MK.Type: types.Type},
         MK.Required: {MK.Type: types.Bool, MK.Required: False},

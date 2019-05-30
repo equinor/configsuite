@@ -22,6 +22,7 @@ import unittest
 import configsuite
 
 from .data import transactions
+from .data import special_numbers
 
 
 class TestContextValidators(unittest.TestCase):
@@ -94,3 +95,25 @@ class TestContextValidators(unittest.TestCase):
         layered_suite = suite.push(top_layer)
 
         self.assertTrue(layered_suite.valid)
+
+    def test_context_validator_container(self):
+        suite = configsuite.ConfigSuite(
+            special_numbers.build_config(),
+            special_numbers.build_schema(),
+            extract_validation_context=special_numbers.extract_context,
+        )
+
+        self.assertTrue(suite.valid, suite.errors)
+
+    def test_context_validator_faulty_container(self):
+        config = special_numbers.build_config()
+        config["others"]["self"] = "I'm a snow flake"
+
+        suite = configsuite.ConfigSuite(
+            config,
+            special_numbers.build_schema(),
+            extract_validation_context=special_numbers.extract_context,
+        )
+
+        self.assertFalse(suite.readable)
+        self.assertFalse(suite.valid)
