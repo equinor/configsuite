@@ -26,12 +26,15 @@ ValidationResult = collections.namedtuple("ValidationResult", ("valid", "errors"
 
 
 class Validator(object):
-    def __init__(self, schema, stop_condition=(lambda schema: False)):
+    def __init__(
+        self, schema, stop_condition=(lambda schema: False), apply_validators=True
+    ):
         self._schema = schema
         self._errors = None
         self._key_stack = None
         self._context = None
         self._stop_condition = stop_condition
+        self._apply_validators = apply_validators
 
     def validate(self, config, context=None):
         self._errors = []
@@ -61,10 +64,10 @@ class Validator(object):
             msg = "Unknown type {} while validating"
             raise TypeError(msg.format(data_type))
 
-        if valid:
+        if self._apply_validators and valid:
             valid &= self._element_validation(config, schema)
 
-        if valid:
+        if self._apply_validators and valid:
             valid &= self._context_validation(config, schema)
 
         return bool(valid)

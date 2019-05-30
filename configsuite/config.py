@@ -324,7 +324,7 @@ class ConfigSuite(object):
             return not isinstance(schema[MK.Type], configsuite.types.Collection)
 
         container_validator = configsuite.Validator(
-            self._schema, stop_condition=_not_container
+            self._schema, stop_condition=_not_container, apply_validators=False
         )
         container_errors = []
         for idx, layer in enumerate(layers):
