@@ -208,42 +208,53 @@ class ConfigSuite(object):
         self._valid &= len(self._errors) == 0
         return layers
 
-    def _build_initial_merged_config(self, layers, schema):
+    def _build_initial_named_dict_merged_config(self, layers, schema):
         rec = self._build_initial_merged_config
+        content_schema = schema[MK.Content]
+        config = {}
+        all_keys = (key for layer in layers for key in layer.keys())
+        for key in all_keys:
+            child_layers = tuple([layer[key] for layer in layers if key in layer])
+            if len(child_layers) == 0:
+                continue
+
+            if key in content_schema:
+                config[key] = rec(child_layers, content_schema[key])
+            else:
+                config[key] = child_layers[-1]
+        return config
+
+    def _build_initial_dict_merged_config(self, layers, schema):
+        rec = self._build_initial_merged_config
+        content_schema = schema[MK.Content]
+        config = {}
+        all_keys = (key for layer in layers for key in layer.keys())
+        for key in all_keys:
+            child_layers = tuple([layer[key] for layer in layers if key in layer])
+            if len(child_layers) == 0:
+                continue
+            config[key] = rec(child_layers, content_schema[MK.Value])
+        return config
+
+    def _build_initial_list_merged_config(self, layers, schema):
+        rec = self._build_initial_merged_config
+        item_schema = schema[MK.Content][MK.Item]
+        config = []
+        for layer in layers:
+            config += [rec((item,), item_schema) for item in layer]
+        return tuple(config)
+
+    def _build_initial_merged_config(self, layers, schema):
         data_type = schema[MK.Type]
 
         if isinstance(data_type, configsuite.types.BasicType):
             return layers[-1]
         elif data_type == configsuite.types.List:
-            item_schema = schema[MK.Content][MK.Item]
-            config = []
-            for layer in layers:
-                config += [rec((item,), item_schema) for item in layer]
-            return tuple(config)
+            return self._build_initial_list_merged_config(layers, schema)
         elif data_type == configsuite.types.NamedDict:
-            content_schema = schema[MK.Content]
-            config = {}
-            all_keys = (key for layer in layers for key in layer.keys())
-            for key in all_keys:
-                child_layers = tuple([layer[key] for layer in layers if key in layer])
-                if len(child_layers) == 0:
-                    continue
-
-                if key in content_schema:
-                    config[key] = rec(child_layers, content_schema[key])
-                else:
-                    config[key] = child_layers[-1]
-            return config
+            return self._build_initial_named_dict_merged_config(layers, schema)
         elif data_type == configsuite.types.Dict:
-            content_schema = schema[MK.Content]
-            config = {}
-            all_keys = (key for layer in layers for key in layer.keys())
-            for key in all_keys:
-                child_layers = tuple([layer[key] for layer in layers if key in layer])
-                if len(child_layers) == 0:
-                    continue
-                config[key] = rec(child_layers, content_schema[MK.Value])
-            return config
+            return self._build_initial_dict_merged_config(layers, schema)
         else:
             msg = "Encountered unknown type {} while building raw config"
             raise TypeError(msg.format(str(data_type)))
