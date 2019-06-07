@@ -101,6 +101,14 @@ def validator_msg(msg):
     """
 
     def real_decorator(function):
+        def _build_argument_str(*args, **kwargs):
+            elems = [str(arg) for arg in args]
+            elems += [
+                "{}={}".format(str(key), str(value)) for key, value in kwargs.items()
+            ]
+
+            return ", ".join(elems)
+
         class Wrapper(object):
             def __init__(self, function, msg):
                 self._function = function
@@ -110,18 +118,9 @@ def validator_msg(msg):
             def msg(self):
                 return self._msg
 
-            def _build_argument_str(self, *args, **kwargs):
-                elems = [str(arg) for arg in args]
-                elems += [
-                    "{}={}".format(str(key), str(value))
-                    for key, value in kwargs.items()
-                ]
-
-                return ", ".join(elems)
-
             def __call__(self, *args, **kwargs):
                 res = self._function(*args, **kwargs)
-                argument_str = self._build_argument_str(*args, **kwargs)
+                argument_str = _build_argument_str(*args, **kwargs)
                 return BooleanResult(res, self._msg, argument_str)
 
         return Wrapper(function, msg)
