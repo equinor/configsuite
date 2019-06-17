@@ -126,7 +126,8 @@ def build_config():
 
 
 def build_docs():
-    return """The PetMeet configuration is to give an overview of you and your pet to better be able to find a matching pet owner.
+    return """The PetMeet configuration is to give an overview of you and your \
+pet to better be able to find a matching pet owner.
 
 **name*:**
     Your full name.
