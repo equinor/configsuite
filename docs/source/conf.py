@@ -12,11 +12,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath(os.path.join("..", "..")))
-
+import configsuite
 
 # -- Project information -----------------------------------------------------
 
@@ -24,8 +20,6 @@ project = u"Config Suite"
 # pylint: disable=redefined-builtin
 copyright = u"2018, Equinor ASA & TNO"
 author = u"Equinor ASA & TNO"
-
-import configsuite
 
 # The short X.Y version.
 version = configsuite.__version__
