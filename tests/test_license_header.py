@@ -44,7 +44,7 @@ in all copies or substantial portions of the Software.
 """
 
     def setUp(self):
-        ignore_extensions = (".pyc",)
+        ignore_extensions = (".pyc", ".rst", ".css", ".js")
 
         source_dirs = (os.path.dirname(configsuite.__file__), os.path.dirname(__file__))
 
