@@ -1,0 +1,68 @@
+version: 2.1
+commands:
+  python_build:
+    parameters:
+      python_version:
+        type: string
+        default: ""
+    steps:
+      - checkout
+      - run: sudo chown -R circleci:circleci /usr/local/bin
+      - run: sudo chown -R circleci:circleci /usr/local/lib/python<< parameters.python_version >>/site-packages
+      - run: cat requirements/* > requirements.lock
+      - restore_cache:
+          key: deps9-{{ .Branch }}-{{ checksum "requirements.lock" }}-<< parameters.python_version >>
+      - run:
+          command: |
+            pip install -r requirements/circleci-requirements.txt
+            pip install -r requirements/circleci-docs-requirements.txt
+            pip install -r requirements/circleci-test-requirements.txt
+      - save_cache: # cache Python dependencies using checksum of Pipfile as the cache-key
+          key: deps9-{{ .Branch }}-{{ checksum "requirements.lock" }}-<< parameters.python_version >>
+          paths:
+            - /usr/local/bin
+            - /usr/local/lib/python<< parameters.python_version >>/site-packages
+      - run:
+          command: |
+            python setup.py test --addopts --junitxml=test-results/pytest/results.xml
+            python setup.py install
+            python setup.py build_sphinx
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+          destination: test-results
+
+jobs:
+  python-27:
+    docker:
+      - image: circleci/python:2.7
+    steps:
+      - python_build:
+          python_version: "2.7"
+  python-35:
+    docker:
+      - image: circleci/python:3.5
+    steps:
+      - python_build:
+          python_version: "3.5"
+  python-36:
+    docker:
+      - image: circleci/python:3.6
+    steps:
+      - python_build:
+          python_version: "3.6"
+  python-37:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - python_build:
+          python_version: "3.7"
+
+workflows:
+  build:
+    jobs:
+      - python-27
+      - python-35
+      - python-36
+      - python-37
