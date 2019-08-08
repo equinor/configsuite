@@ -167,7 +167,7 @@ def _is_bool(x):
     return isinstance(x, bool)
 
 
-@validator_msg("Is x a date")
+@validator_msg("Is x a valid ISO8601(YYYY-mm-dd) date format")
 def _is_date(x):
     return isinstance(x, datetime.date)
 
