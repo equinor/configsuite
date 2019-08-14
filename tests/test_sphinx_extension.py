@@ -198,3 +198,35 @@ class TestSphinxExtension(unittest.TestCase):
 
         for content in contents:
             self.assertTrue(content in html)
+
+    @tmpdir("tests/data/doc")
+    @with_sphinx_app()
+    def test_sphinx_complete_generation(self, app):
+        complete_schema = """
+        .. configsuite::
+            :module: tests.data.car.build_schema_with_validators_and_transformators
+        """
+        with open("index.rst", "w") as f:
+            f.write(complete_schema)
+
+        app.build()
+        with open(os.path.join(app.outdir, "index.html"), "r") as f:
+            html = f.read()
+
+        contents = [
+            "production_date",
+            "country",
+            #  "Norway",
+            "tire",
+            "dimension",
+            # "17",
+            "owner",
+            "location",
+            "incidents",
+            "Convert to cm",
+            "Convert to cm - ignoring context",
+            "Is x a valid date",
+            "Is x a valid dimension",
+        ]
+        for content in contents:
+            self.assertTrue(content in html)
