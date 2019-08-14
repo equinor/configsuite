@@ -95,6 +95,26 @@ def build_schema():
     }
 
 
+def build_schema_with_validators_and_transformators():
+    schema = build_schema()
+    dimension_schema = schema[MK.Content]["tire"][MK.Content]["dimension"]
+    dimension_schema[MK.Transformation] = inch_to_cm
+    dimension_schema[MK.ContextTransformation] = inch_to_cm_context_based
+
+    dimension_schema[MK.ElementValidators] = [is_valid_dimension]
+    date_content = {
+        MK.Type: types.DateTime,
+        MK.Default: datetime.datetime(1999, 1, 1),
+        MK.ContextValidators: [is_valid_date],
+        MK.Required: False,
+        MK.AllowNone: True,
+    }
+
+    owner_schema = schema[MK.Content]["owner"]
+    owner_schema[MK.Content][MK.Value][MK.Content]["date"] = date_content
+    return schema
+
+
 @configsuite.validator_msg("Is x a valid dimension")
 def is_valid_dimension(dimension):
     return 30 <= dimension <= 50

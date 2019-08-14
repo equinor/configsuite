@@ -63,24 +63,32 @@ def scb_static_path(app):
     app.config.html_static_path.append(static_path)
 
 
-def generate(schema, parent_section, parent_title=""):
-    title = schema.get(MK.Description, "default_title")[:10]
-    title = title.lower()
-    title = title.replace(" ", "_")
-    example = None
-
-    section = cs_container(
-        classes=["cs_container"], ids=["cs_{}_container".format(title)]
-    )
-
-    section += cs_header(classes=["cs_header"], text=parent_title)
-
+def generate_section_content(schema, title):
     section_content = cs_content(
         classes=["cs_content"], ids=["cs_{}_content".format(title)]
     )
 
     section_content += nodes.paragraph(text=schema.get(MK.Description, ""))
 
+    for config_key in [MK.ElementValidators, MK.ContextValidators]:
+        element_nodes = [
+            nodes.paragraph(text=validator.msg)
+            for validator in schema.get(config_key, [])
+        ]
+        section_content.extend(element_nodes)
+
+    for config_key in [
+        MK.LayerTransformation,
+        MK.ContextTransformation,
+        MK.Transformation,
+    ]:
+        if config_key in schema:
+            section_content += nodes.paragraph(text=schema.get(config_key).msg)
+
+    return section_content
+
+
+def generate_section_children(schema, title):
     section_children = cs_children(
         classes=["cs_children"], ids=["cs_{}_children".format(title)]
     )
@@ -116,6 +124,24 @@ def generate(schema, parent_section, parent_title=""):
     else:
         err_msg = "Unexpected type ({}) in schema while generating documentation."
         raise TypeError(err_msg.format(schema[MK.Type]))
+
+    return section_children
+
+
+def generate(schema, parent_section, parent_title=""):
+    title = schema.get(MK.Description, "default_title")[:15]
+    title = title.lower()
+    title = title.replace(" ", "_")
+    example = None
+
+    section = cs_container(
+        classes=["cs_container"], ids=["cs_{}_container".format(title)]
+    )
+
+    section += cs_header(classes=["cs_header"], text=parent_title)
+
+    section_content = generate_section_content(schema, title)
+    section_children = generate_section_children(schema, title)
 
     section_content += section_children
 
