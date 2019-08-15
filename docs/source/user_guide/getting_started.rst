@@ -832,10 +832,58 @@ would result in the following after being merged:
 Documentation generation
 ------------------------
 
-Currently *Config Suite* have rather limited functionality for generating
-documentation. This is to be improved in the future. Currently, you can pass
-your schema to ``configsuite.docs.generate`` and it will generate documentation
-as `reStructuredText <http://docutils.sourceforge.net/rst.html>`_.
+The available functionality for generating documentation is still rather
+limited, but will continously be improved upon.
+
+Programatically
+~~~~~~~~~~~~~~~
+
+You can pass your schema to ``configsuite.docs.generate`` and it will generate
+documentation as `reStructuredText <http://docutils.sourceforge.net/rst.html>`_.
+
+Sphinx
+~~~~~~
+
+*Config Suite* includes a sphinx extension for generating documentation. It has
+only been tested to work with the default sphinx theme; ``Alabaster``. The
+extension must be included in the ``conf.py`` file:
+
+.. code-block:: python
+
+    extensions += "configsuite.extension.ext"
+
+The sphinx directive ``configsuite`` can then be added in your documentation as
+follows:
+
+.. code-block:: rst
+
+    .. configsuite::
+        :module: module.function
+
+Where the ``function`` value points to a function that returns a valid
+*Config Suite* schema.
+
+The generated documentation will contain a section for each container and can
+be expanded by clicking the header. There is fairly limited graphical designs
+added by default, but you are free to include more. The generated html files
+will consist of four ``classes``; ``cs_top_container``, ``cs_container``,
+``cs_header``, ``cs_content`` and ``cs_children``. The ``cs_top_container``
+contains the entire configuration, while each subsection in the schema will
+have at least one of each of the remaining classes.
+
+The ``cs_container`` is the main container holding one of each of ``cs_header``
+and ``cs_content``. The ``cs_content`` contains the text from ``MK.Description``
+and includes the messages from any ``Validators`` and ``Tansformations``.
+The ``cs_children`` class furthermore contains a new node for each sub-element
+that is built with the same classes above.
+
+Given the nature of the schema's one would typically end up with many
+``cs_containers``. We have tried to facilitate specific customization if the
+user would like to have that, by including the possibility of unique ``id``'s
+for every container. The id is for e.g. ``cs_{}_container``, where ``{}``
+will be replaced by the title.
+
+You can then include a customized ``.css`` file that acts on each item.
 
 Validators
 ----------
