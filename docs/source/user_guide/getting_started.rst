@@ -629,7 +629,7 @@ Afterwards, you can add this to your schema as follows:
         MK.Content: {
             "name": {
                 MK.Type: types.String,
-                MK.ElementValidator: _is_name,
+                MK.ElementValidators: (_is_name,),
             },
             "hobby": {MK.Type: types.String},
         }
