@@ -1,2 +1,0 @@
-enum34==1.1.6 ; python_version<'3.4'
-six==1.12.0 ; python_version<'3'

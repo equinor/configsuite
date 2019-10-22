@@ -7,9 +7,9 @@ python:
     - '3.6'
 
 install:
-  - pip install -r requirements/travis-requirements.txt
-  - pip install -r requirements/travis-test-requirements.txt
-  - pip install -r requirements/travis-docs-requirements.txt
+  - pip install -r requirements/ci-requirements.txt
+  - pip install -r requirements/ci-test-requirements.txt
+  - pip install -r requirements/ci-docs-requirements.txt
 
 script:
     - python setup.py test
