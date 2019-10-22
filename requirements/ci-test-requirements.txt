@@ -1,12 +1,14 @@
-coverage==4.5.3
+coverage==4.5.4
 setuptools_scm==3.3.3
 setuptools_scm_about==1.0
-pytest==4.5
-pytest-runner==4.4
-pytest-pylint==0.14.0
+pytest==4.6.6 ; python_version<'3.5'
+pytest==5.2.1 ; python_version>='3.5'
+pytest-runner==5.1
+pytest-pylint==0.14.1
 black==19.3b0 ; python_version>='3.6'
-pylint==2.3.1 ; python_version>='3'
-pylint==1.9.4 ; python_version<'3' # rq.filter: <2
-pytest-cov==2.7.1
-jinja2==2.10.1
+pylint==2.4.3 ; python_version>='3.5'
+pylint==2.3.1 ; python_version>='3' and python_version<'3.5'
+pylint==1.9.5 ; python_version<'3' # rq.filter: <2
+pytest-cov==2.8.1
+jinja2==2.10.3
 unittest-xml-reporting==2.5.1
