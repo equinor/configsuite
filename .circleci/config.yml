@@ -9,14 +9,14 @@ commands:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python<< parameters.python_version >>/site-packages
-      - run: cat requirements/circleci-* > requirements.lock
+      - run: cat requirements/ci-* > requirements.lock
       - restore_cache:
           key: deps9-{{ .Branch }}-{{ checksum "requirements.lock" }}-<< parameters.python_version >>
       - run:
           command: |
-            pip install -r requirements/circleci-requirements.txt
-            pip install -r requirements/circleci-docs-requirements.txt
-            pip install -r requirements/circleci-test-requirements.txt
+            pip install -r requirements/ci-requirements.txt
+            pip install -r requirements/ci-docs-requirements.txt
+            pip install -r requirements/ci-test-requirements.txt
       - save_cache:
           key: deps9-{{ .Branch }}-{{ checksum "requirements.lock" }}-<< parameters.python_version >>
           paths:
