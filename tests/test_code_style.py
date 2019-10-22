@@ -22,15 +22,16 @@ import sys
 import os
 
 
+BLACK_MINIMUM_PY_VERSION = (3, 6)
+if sys.version_info >= BLACK_MINIMUM_PY_VERSION:
+    # pylint: disable=import-error
+    import black
+    from click.testing import CliRunner
+
+
 class TestCodeFormat(unittest.TestCase):
     @unittest.skipIf(sys.version_info < (3, 6), reason="requires python3.6 or higher")
     def test_code_style(self):
-        # pylint: disable=import-error
-        import black
-
-        # pylint: disable=import-error
-        from click.testing import CliRunner
-
         root_dir = os.path.dirname(os.path.dirname(__file__))
         runner = CliRunner()
         resp = runner.invoke(
