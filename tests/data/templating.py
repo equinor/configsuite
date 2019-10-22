@@ -105,8 +105,7 @@ def template_results_no_definitions():
 
 def extract_templating_context(configuration):
     Context = collections.namedtuple("TemplatingContext", ["definitions"])
-    definitions = {key: value for (key, value) in configuration.definitions}
-    return Context(definitions=definitions)
+    return Context(definitions=copy.deepcopy(configuration.definitions))
 
 
 def build_schema_with_definitions():
