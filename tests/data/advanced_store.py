@@ -47,7 +47,11 @@ def build_schema():
                         MK.Content: {
                             "kilo": {MK.Type: types.Number},
                             "gram": {MK.Type: types.Number},
-                            "unit": {MK.Type: types.Number, MK.Required: False},
+                            "unit": {
+                                MK.Type: types.Number,
+                                MK.Required: False,
+                                MK.AllowNone: True,
+                            },
                         },
                     },
                 },

@@ -25,18 +25,20 @@ def build_schema():
     return {
         MK.Type: types.NamedDict,
         MK.Content: {
-            "name": {MK.Type: types.String},
-            "weight": {MK.Type: types.Number, MK.Required: False, MK.AllowNone: True},
-            "current_job": {
+            "OS": {MK.Type: types.String},
+            "components": {
                 MK.Type: types.NamedDict,
-                MK.Required: False,
+                MK.Content: {"cpu": {MK.Type: types.String}},
+            },
+            "externals": {
+                MK.Type: types.List,
+                MK.Content: {MK.Item: {MK.Type: types.String}},
+            },
+            "software": {
+                MK.Type: types.Dict,
                 MK.Content: {
-                    "company_name": {MK.Type: types.String},
-                    "position": {
-                        MK.Type: types.String,
-                        MK.Required: False,
-                        MK.AllowNone: True,
-                    },
+                    MK.Key: {MK.Type: types.String},
+                    MK.Value: {MK.Type: types.String},
                 },
             },
         },
@@ -45,10 +47,8 @@ def build_schema():
 
 def build_config():
     return {
-        "name": "Atle Jonny",
-        "weight": 100,
-        "current_job": {
-            "company_name": "Super Traktor",
-            "position": "Assisting director of the printer room",
-        },
+        "OS": "Linux",
+        "components": {"cpu": "amd"},
+        "externals": ["Floppy", "Punch cards"],
+        "software": {"python": "1.3", "ERT": "3.0"},
     }

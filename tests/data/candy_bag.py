@@ -40,7 +40,11 @@ def build_schema():
                         MK.ElementValidators: (_non_empty_name,),
                     },
                     "price": {MK.Type: types.Number},
-                    "story": {MK.Type: types.String, MK.Required: False},
+                    "story": {
+                        MK.Type: types.String,
+                        MK.Required: False,
+                        MK.AllowNone: True,
+                    },
                 },
             }
         },
