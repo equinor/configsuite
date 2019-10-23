@@ -48,8 +48,13 @@ class Validator(object):
             return True
 
         data_type = schema[MK.Type]
+        allow_none = schema.get(MK.AllowNone, False)
 
-        valid = data_type.validate(config)
+        if allow_none and config is None:
+            valid = True
+        else:
+            valid = data_type.validate(config)
+
         if not valid:
             self._add_invalid_type_error(valid.msg)
         elif isinstance(data_type, configsuite.BasicType):

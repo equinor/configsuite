@@ -25,11 +25,29 @@ from configsuite import MetaKeys as MK
 from configsuite import types
 
 
+@configsuite.validator_msg("AllowNone can only be used for BasicType")
+def _check_allownone_type(schema_level):
+    if MK.AllowNone in schema_level:
+        return isinstance(schema_level[MK.Type], types.BasicType)
+    return True
+
+
+@configsuite.validator_msg("Non required types must allow None")
+def _check_allownone_required(schema_level):
+    if isinstance(schema_level[MK.Type], types.BasicType):
+        allow_none = schema_level.get(MK.AllowNone, False)
+        if not allow_none:
+            return schema_level.get(MK.Required, True)
+    return True
+
+
 _META_SCHEMA = {
     MK.Type: types.NamedDict,
+    MK.ElementValidators: (_check_allownone_type, _check_allownone_required),
     MK.Content: {
         MK.Type: {MK.Type: types.Type},
         MK.Required: {MK.Type: types.Bool, MK.Required: False},
+        MK.AllowNone: {MK.Type: types.Bool, MK.Required: False},
         MK.Description: {MK.Type: types.String, MK.Required: False},
         MK.ElementValidators: {
             MK.Type: types.List,
