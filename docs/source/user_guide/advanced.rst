@@ -9,7 +9,10 @@ creating a new instance of ``configsuite.BasicType``. The constructor takes a
 type name, as well as a validator of the type. For instance, the ``Date``
 type in Config Suite could be implemented as follows:
 
-.. code-block:: python
+.. testcode:: [user_types]
+
+    import configsuite
+    import datetime
 
     @configsuite.validator_msg("Is x a date")
     def _is_date(x):
@@ -19,6 +22,24 @@ type in Config Suite could be implemented as follows:
 
 After this, you can use ``Date`` as a ``MetaKeys.Type`` value in your schema as
 displayed in the ``cars``-schema.
+
+.. testcode:: [user_types]
+
+    import yaml
+    from configsuite import MetaKeys as MK
+
+    schema = {MK.Type: Date}
+    config = yaml.load("1988-06-05")
+
+    suite = configsuite.ConfigSuite(config, schema)
+
+    print(suite.valid)
+    print(suite.snapshot)
+
+.. testoutput:: [user_types]
+
+    True
+    1988-06-05
 
 Context validators
 ------------------
@@ -36,9 +57,9 @@ central concepts in your configuration. An example would be a configuration of
 students and classes. You want to enable specification of both students and
 classes, yet you also want to list the students attending each class. 
 
-.. code-block:: python
+.. testcode:: [context_validators]
 
-    import collection
+    import collections
 
     import configsuite
     from configsuite import MetaKeys as MK
@@ -60,7 +81,7 @@ classes, yet you also want to list the students attending each class.
     }
 
 
-    @configsuite.validatior_msg("Is x a student name")
+    @configsuite.validator_msg("Is x a student name")
     def _is_student(name, context):
         return name in context.student_names
 
@@ -78,7 +99,7 @@ classes, yet you also want to list the students attending each class.
                         MK.Content: {
                             MK.Item: {
                                 MK.Type: types.String,
-                                MK.ContextValidator: _is_student, 
+                                MK.ContextValidators: (_is_student,),
                             },
                         },
                     },
@@ -89,13 +110,16 @@ classes, yet you also want to list the students attending each class.
 
 
     schema = {
-        "students": _student_schema,
-        "courses": _course_schema,
+        MK.Type: types.NamedDict,
+        MK.Content: {
+            "students": _student_schema,
+            "courses": _course_schema,
+        },
     }
 
 
     def _extract_student_names(snapshot):
-        Context = collection.namedtuple("Context", ("student_names",))
+        Context = collections.namedtuple("Context", ("student_names",))
         student_names = tuple(
             student.name for student in snapshot.students
         )
@@ -116,13 +140,64 @@ attribute, we achieve just that.
 
 Now, to create a suite with the configuration ``config``, we do as follows:
 
-.. code-block:: python
+.. testcode:: [context_validators]
+
+    config = {
+        "students": [
+            {
+                "name": "Per",
+                "age": 21,
+                "favourite_lunch": "graut",
+            },
+            {
+                "name": "Espen",
+                "age": 17,
+                "favourite_lunch": "troll",
+            },
+        ],
+        "courses": [
+            {
+                "name": "adventures-101",
+                "max_size": 50,
+                "students": ["Per", "Espen"],
+            },
+        ],
+    }
 
     suite = configsuite.ConfigSuite(
         config,
         schema,
         extract_validation_context=_extract_student_names,
     )
+
+    print(suite.valid)
+
+.. testoutput:: [context_validators]
+
+    True
+
+However, if we add a course with an unknown student:
+
+.. testcode:: [context_validators]
+
+    invalid_suite = suite.push({
+        "courses": [
+            {
+                "name": "impossible-101",
+                "max_size": 0,
+                "students": "Pål",
+            },
+        ],
+    })
+
+    print(invalid_suite.valid)
+    print(invalid_suite.errors)
+
+.. testoutput:: [context_validators]
+
+    False
+    (InvalidTypeError(msg=Is x a list is false on input 'Pål', key_path=('courses', 0, 'students'), layer=1),)
+
 
 Context transformations
 -----------------------
@@ -135,7 +210,7 @@ display a simple implementation of such a system.
 First, we must implement functionality for given a ``template`` and ``definitions``
 to render the templates. That can be done as follows:
 
-.. code-block:: python
+.. testcode:: [context_transformations]
 
     import collections
     import copy
@@ -195,7 +270,7 @@ to render the templates. That can be done as follows:
 
 Second, we must implement a context extractor.
 
-.. code-block:: python
+.. testcode:: [context_transformations]
 
     def extract_templating_context(configuration):
         Context = collections.namedtuple("TemplatingContext", ["definitions"])
@@ -204,7 +279,7 @@ Second, we must implement a context extractor.
 
 Third, we define the schema.
 
-.. code-block:: python
+.. testcode:: [context_transformations]
 
     schema = {
         MK.Type: types.NamedDict,
@@ -235,7 +310,8 @@ And then, given the following yaml-configuration:
     definitions:
       animal: pig
       habitants: <animal>, cow and monkey
-      secret_number: 42
+      color: blue
+      secret_number: "42"
     templates:
       - This is a story about a <animal>.
       - It had a <color> house.
@@ -243,21 +319,54 @@ And then, given the following yaml-configuration:
       - If you entered the house you would meet: <habitants>.
       - The end.
 
-
 we obtain the following rendered ``templates`` after feeding the ``config``,
 ``schema`` and the ``extract_templating_context`` through
 ``configsuite.ConfigSuite``.
 
-.. code-block:: python
+.. testcode:: [context_transformations]
 
-    >>> suite.snapshot.templates
-    (
-        "This is a story about a pig.",
-        "It had a blue house.",
-        "And the password to enter was 42.",
-        "If you entered the house you would meet: pig, cow and monkey",
-        "The end.",
+    import yaml
+
+    config = yaml.safe_load("""
+    definitions:
+      animal: pig
+      habitants: <animal>, cow and monkey
+      color: blue
+      secret_number: "42"
+    templates:
+      - This is a story about a <animal>.
+      - It had a <color> house.
+      - And the password to enter was <secret_number>.
+      - "If you entered the house you would meet: <habitants>."
+      - The end.
+    """)
+    suite = configsuite.ConfigSuite(
+        config,
+        schema,
+        extract_transformation_context=extract_templating_context,
     )
+
+    print(suite.valid)
+
+.. testoutput:: [context_transformations]
+
+    True
+
+Furthermore, if we print the rendered templates we get the following:
+
+.. testcode:: [context_transformations]
+
+    for line in suite.snapshot.templates:
+        print(line)
+
+.. testoutput:: [context_transformations]
+
+    This is a story about a pig.
+    It had a blue house.
+    And the password to enter was 42.
+    If you entered the house you would meet: pig, cow and monkey.
+    The end.
+
 
 Notice that we can now merge multiple layers, with definitions in higher levels
 taking precedence.
@@ -290,7 +399,11 @@ function ``_realize_list`` that takes as input a string of ranges and singletons
 and returns a list as in the example above. And that one in addition decorates it with a
 ``transformation_msg``. Then, the following schema
 
-.. code-block:: python
+.. testsetup:: [layer_transformations]
+
+    _realize_list = lambda x: x
+
+.. testcode:: [layer_transformations]
 
     from configsuite import MetaKeys as MK
     from configsuite import types
