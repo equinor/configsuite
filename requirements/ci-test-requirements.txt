@@ -12,3 +12,4 @@ pylint==1.9.5 ; python_version<'3' # rq.filter: <2
 pytest-cov==2.8.1
 jinja2==2.10.3
 unittest-xml-reporting==2.5.1
+PyYAML==5.1.2
