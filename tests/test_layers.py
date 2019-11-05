@@ -155,6 +155,29 @@ class TestLayers(unittest.TestCase):
 
         self.assertEqualSnapshots(combined_config.snapshot, layered_config.snapshot)
 
+    def test_multi_layers_dict_intersection(self):
+        schema = data.hero.build_schema()
+
+        bottom_layer = {
+            "heroes": [],
+            "villains": {"Phantom Blot": 0, "Lux": 0, "Joker": 0},
+        }
+        middle_layer = {"villains": {"Phantom Blot": 1, "Lux": 1}}
+        top_layer = {"villains": {"Phantom Blot": 2}}
+
+        layered_config = configsuite.ConfigSuite(
+            top_layer, schema, layers=(bottom_layer, middle_layer)
+        )
+        self.assertTrue(layered_config.valid)
+
+        villains = dict(layered_config.snapshot.villains)
+        self.assertEqual(
+            sorted(["Phantom Blot", "Lux", "Joker"]), sorted(villains.keys())
+        )
+        self.assertEqual(0, villains["Joker"])
+        self.assertEqual(1, villains["Lux"])
+        self.assertEqual(2, villains["Phantom Blot"])
+
     def test_layers_list_init(self):
         schema = data.hero.build_schema()
 
