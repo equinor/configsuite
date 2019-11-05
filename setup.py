@@ -76,6 +76,7 @@ setuptools.setup(
         "pylint",
         "pytest-cov",
         "jinja2",
+        "pyyaml",
     ],
     test_suite="tests",
 )
