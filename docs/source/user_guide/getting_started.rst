@@ -841,6 +841,7 @@ And now, we can insert this into the schema as follows:
                     "credit": {
                         MK.Type: types.Number,
                         MK.Required: False,
+                        MK.AllowNone: True,
                         MK.Transformation: _to_float,
                     },
                     "insured": {MK.Type: types.Bool},
