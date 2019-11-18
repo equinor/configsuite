@@ -1,2 +1,4 @@
 enum34==1.1.6 ; python_version<'3.4'
-six==1.12.0 ; python_version<'3'
+six==1.13.0 ; python_version<'3'
+setuptools_scm==3.3.3
+setuptools_scm_about==1.0
