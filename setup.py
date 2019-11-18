@@ -77,6 +77,9 @@ setuptools.setup(
         "pytest-cov",
         "jinja2",
         "pyyaml",
+        "coverage",
+        "unittest-xml-reporting",
+        "PyYAML",
     ],
     test_suite="tests",
 )
