@@ -133,7 +133,7 @@ complete control of the ``context``, which means that we could have returned the
 entire snapshot, or a tuple containing just the ``student`` names. The first is
 not recommended as it is good to be conscious regarding what the context
 contains. In particular, a user will have to carry the same amount of
-information in their head while auditing a configuration file. The later,
+information in their head while auditing a configuration file. The latter,
 because we recommend to make the context extendable without having to change
 all the context validators. And by putting all student names under an
 attribute, we achieve just that.
