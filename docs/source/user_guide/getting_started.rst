@@ -458,12 +458,12 @@ correctness of the configuration.
 
 Readable
 ~~~~~~~~
-The concept of configuration readiness implies one specified a value in the
+The concept of configuration readiness implies if one specified a value in the
 schema, one is to expect that that piece of data is indeed present in the
-snapshot. But what if the configuration feed to the suite is not valid? If the
+snapshot. But what if the configuration fed to the suite is not valid? If the
 errors appear in basic types, one can still access all the data as expected
-(i.e. ``config.snapshot.owner.name`` from the car example above).  However, if
-a container is of the wrong type on cannot guarantee such a thing.  In
+(i.e. ``config.snapshot.owner.name`` from the car example above). However, if
+a container is of the wrong type one cannot guarantee such a thing. In
 particular, if we bring back the single-car example from above and consider the
 following configuration:
 
@@ -637,11 +637,11 @@ the ``credit``:
 Layers
 ------
 
-Layers is a fundamental concept in Config Suite that enables you to retrieve
+Layers is a fundamental concept in *Config Suite* that enables you to retrieve
 configurations from multiple sources in a consistent manner. It can be utilized
 to give priority to different sources, being application defaults, installation
 defaults, project or user settings, as well as case specific configuration. It
-can also be utilized to reprent changes in configuration from a UI in a
+can also be utilized to represent changes in configuration from a UI in a
 consistent manner.
 
 In short, a layer is, a possibly incomplete, configuration source. Multiple
