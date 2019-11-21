@@ -569,15 +569,70 @@ value to something else then ``None``, we refer the reader to the next section.
 
 How to specify default values
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We have planned two ways of providing default values in Config Suite. You are
-to either specify it in the schema via the keyword ``MetaKeys.Default`` (NOTE:
-This is yet to be implemented!). This has the advantage of being able to provide default
-values inside list-elements. The disadvantage is that you would need to edit
-the code to change the default values and hence site or project specific
-defaults are not suited for this purpose. The second, and currently only
-implemented, way of specifying default are via ``layers``.
+There exists two ways of providing default values in Config Suite. You are
+to either specify it in the schema via the keyword ``MetaKeys.Default``. This
+has the advantage of being able to provide default values for ``BasicTypes``
+within containers. The disadvantage is that you would need to edit the code to
+change the default values and hence site or project specific defaults are not
+suited for this purpose. The second way of specifying default are via ``layers``.
 
 Note that no element should be both required and have a given ``Default`` value.
+
+Schema defaults
+---------------
+
+The default value for any ``BasicType`` may be set within the schema itself by
+using the ``MK.Default`` key. The ``Type`` of ``MK.Default`` must be consistent
+with the schema configuration, otherwise it will not be valid. Please note that
+any `Validators`_ or `Transformations`_ are applied to default values as well,
+and they can be regarded as if they were coming directly from the user. Setting
+a default value implies that it is not required, and thus ``MK.Required`` must be
+specified as well as ``MK.AllowNone``.
+
+Let us see how the ``owner`` section could be configured with default value for
+the ``credit``:
+
+.. testcode:: [schema_defaults]
+
+    import configsuite
+    from configsuite import types
+    from configsuite import MetaKeys as MK
+
+    schema = {
+        MK.Type: types.NamedDict,
+        MK.Content: {
+            "owner": {
+                MK.Type: types.NamedDict,
+                MK.Content: {
+                    "name": {MK.Type: types.String},
+                    "credit": {
+                        MK.Type: types.Number,
+                        MK.Default: 0,
+                        MK.Required: False,
+                        MK.AllowNone: True,
+                    },
+                    "insured": {MK.Type: types.Bool},
+                },
+            },
+        },
+    }
+
+    config = {
+        "owner": {
+                "name": "Scrooge",
+                "insured": False,
+        },
+    }
+
+    suite = configsuite.ConfigSuite(config, schema)
+    assert suite.valid
+
+    owner = suite.snapshot.owner
+    print("{} has a credit of {}".format(owner.name, owner.credit))
+
+.. testoutput:: [schema_defaults]
+
+    Scrooge has a credit of 0
 
 Layers
 ------
