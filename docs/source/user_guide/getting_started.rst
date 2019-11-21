@@ -514,8 +514,66 @@ be raised.
 Note that all valid suites also are readable. And that all unreadable suites
 also are invalid.
 
+Allow None
+----------
+
+For certain configurations it may be reasonable for the user to provide
+``None`` as the value. The ``None`` is a specific value in the eyes of
+``ConfigSuite`` as it is also the value when a value hasn't been provided.
+As such, the schema must be specifically declared to allow the user to set
+``None`` in order for a configuration to be valid if it contains ``None``.
+
+The ``AllowNone`` type is only valid for ``BasicType``'s, not for containers.
+Setting ``AllowNone`` to ``True`` for anything but ``BasicType`` will result
+in an invalid schema.
+
+Let us see how the owner section of the ``cars`` schema could be configured
+in order for a configuration with ``None`` to pass.
+
+.. testcode:: [allownone]
+
+    import configsuite
+    from configsuite import types
+    from configsuite import MetaKeys as MK
+
+    schema = {
+        MK.Type: types.NamedDict,
+        MK.Content: {
+            "owner": {
+                MK.Type: types.NamedDict,
+                MK.Content: {
+                    "name": {MK.Type: types.String},
+                    "credit": {
+                        MK.Type: types.Number,
+                        MK.AllowNone: True,
+                    },
+                    "insured": {MK.Type: types.Bool},
+                },
+            },
+        },
+    }
+
+    config = {
+        "owner": {
+                "name": "Scrooge",
+                "credit": None,
+                "insured": False,
+        },
+    }
+
+    suite = configsuite.ConfigSuite(config, schema)
+    assert suite.valid
+
+    owner = suite.snapshot.owner
+    print("{} has a credit of {}".format(owner.name, owner.credit))
+
+.. testoutput:: [allownone]
+
+    Scrooge has a credit of None
+
+
 Default values
------------------------------
+--------------
 
 So far all entries in your configuration file have been mandatory to fill in.
 And if some key in a Named dict would be missing a ``MissingKeyError`` would be
@@ -564,8 +622,10 @@ the programmer should not have to special case whether or not the value is
 present in the ``snapshot``. The ``snapshot`` is always built based on the schema
 and hence ``suite.snapshot.owner.credit`` would indeed be an attribute
 independently of whether the user has configured it. In this scenario the value
-of ``suite.snapshot.owner.credit`` would be ``None``. To configure the default
-value to something else then ``None``, we refer the reader to the next section.
+of ``suite.snapshot.owner.credit`` would be ``None``.
+
+``ConfigSuite`` requires that any entity that is not required must also allow
+``None``.
 
 How to specify default values
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -579,15 +639,15 @@ suited for this purpose. The second way of specifying default are via ``layers``
 Note that no element should be both required and have a given ``Default`` value.
 
 Schema defaults
----------------
+~~~~~~~~~~~~~~~
 
 The default value for any ``BasicType`` may be set within the schema itself by
 using the ``MK.Default`` key. The ``Type`` of ``MK.Default`` must be consistent
 with the schema configuration, otherwise it will not be valid. Please note that
 any `Validators`_ or `Transformations`_ are applied to default values as well,
 and they can be regarded as if they were coming directly from the user. Setting
-a default value implies that it is not required, and thus ``MK.Required`` must be
-specified as well as ``MK.AllowNone``.
+a default value implies that it is not required, and thus ``MK.Required`` must
+be set to ``False``.
 
 Let us see how the ``owner`` section could be configured with default value for
 the ``credit``:
@@ -635,7 +695,7 @@ the ``credit``:
     Scrooge has a credit of 0
 
 Layers
-------
+~~~~~~
 
 Layers is a fundamental concept in *Config Suite* that enables you to retrieve
 configurations from multiple sources in a consistent manner. It can be utilized
@@ -695,12 +755,12 @@ elements in ``config`` takes precedence over the two other layers and the
 elements in ``middle_layer`` over elements in ``bottom_layer``.
 
 Basic types
-~~~~~~~~~~~
+<<<<<<<<<<<
 Basic types are simply overwritten and only the value from the top most layer
 specifying that value is kept.
 
 Named dicts and dicts
-~~~~~~~~~~~~~~~~~~~~~
+<<<<<<<<<<<<<<<<<<<<<
 Named dicts and dicts are by default joined in an update kind of fashion. All
 the values are joined recursively, key by key. This implies that for the
 ``cars``-example with the following layers:
@@ -730,7 +790,7 @@ would result in the following after being merged:
       insured: True
 
 Lists
-~~~~~
+<<<<<
 Lists are by default appended, with the top layer elements appearing after
 lower levels. If we again lock at the ``cars``-example:
 
