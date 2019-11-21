@@ -32,7 +32,7 @@ Additional examples
 For additional examples we refer the reader to the `test data <https://github.com/equinor/configsuite/tree/master/tests/data>`_.
 
 The API Documentation
------------------
+---------------------
 
 In-deepth documentation of the API of *Config Suite*.
 
