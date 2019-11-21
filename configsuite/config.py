@@ -158,11 +158,17 @@ class ConfigSuite(object):
         config is not readable. Due to this it is built lazily.
         """
         if not self.readable:
-            err_msg = "Internal error: Cannot build merged_config of unreadable configuration."
+            err_msg = (
+                "Internal error: "
+                "Cannot build merged_config of unreadable configuration."
+            )
             raise AssertionError(err_msg)
 
         if self._cached_merged_config is None:
-            err_msg = "Internal error: Merged config cannot be accessed before cache is built."
+            err_msg = (
+                "Internal error: "
+                "Merged config cannot be accessed before cache is built."
+            )
             raise AssertionError(err_msg)
 
         return self._cached_merged_config

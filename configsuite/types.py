@@ -131,8 +131,15 @@ def validator_msg(msg):
 BasicType = collections.namedtuple("Type", ["name", "validate"])
 Collection = collections.namedtuple("Type", ["name", "validate"])
 
-_type_eq = lambda self, other: self.name == other.name
-_type_neq = lambda self, other: not _type_eq(self, other)
+
+def _type_eq(self, other):
+    return self.name == other.name
+
+
+def _type_neq(self, other):
+    return not _type_eq(self, other)
+
+
 Collection.__eq__ = _type_eq
 Collection.__neq__ = lambda self, other: not _type_neq(self, other)
 

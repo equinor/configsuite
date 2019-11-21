@@ -71,6 +71,7 @@ setuptools.setup(
         "pytest",
         "pytest-runner",
         "pytest-pylint",
+        "pytest-flake8",
         "black ; python_version>='3.6'",
         "click ; python_version>='3.6'",
         "pylint",
@@ -80,6 +81,7 @@ setuptools.setup(
         "coverage",
         "unittest-xml-reporting",
         "PyYAML",
+        "flake8",
     ],
     test_suite="tests",
 )

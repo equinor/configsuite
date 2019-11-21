@@ -17,8 +17,6 @@ in all copies or substantial portions of the Software.
 """
 
 from __future__ import absolute_import
-import subprocess
-import os
 
 from configsuite import MetaKeys as MK
 from configsuite import types
@@ -43,9 +41,9 @@ def generate(schema, level=0):
             raise Exception(elem_vals[0].__name__)
 
     if schema[MK.Type] == types.NamedDict:
-        req_child_marker = lambda key: (
-            "*" if schema[MK.Content][key].get(MK.Required, True) else ""
-        )
+
+        def req_child_marker(key):
+            return "*" if schema[MK.Content][key].get(MK.Required, True) else ""
 
         docs += [
             "\n".join(
