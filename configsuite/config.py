@@ -33,8 +33,8 @@ class ConfigSuite(object):
     with a `schema` describing the structure of a configuration, together with
     a `raw_config` and possibly additional `layers`.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     raw_config
         The configuration taking precedence.
     schema
@@ -53,8 +53,8 @@ class ConfigSuite(object):
         callable is given a snapshot of the configuration as argument. Defaults
         to the constant function always returning `None`.
 
-    Raises:
-    -------
+    Raises
+    ------
     TypeError, KeyError, ValueError
         Approperiate errors are raised if provided with an invalid schema. Note
         that errors are independent of `raw_config` and `layers` and hence not
@@ -110,8 +110,8 @@ class ConfigSuite(object):
     def snapshot(self):
         """A complete, immutable representation of the resulting configuration.
 
-        Raises:
-        -------
+        Raises
+        ------
         AssertionError
             Raised on access if `suite` is not `readable`.
         """
@@ -134,14 +134,14 @@ class ConfigSuite(object):
         Builds a new suite with the same schema, but with `raw_config` on top
         of the layers in the current suite.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         raw_config:
             A configuration that is to take precedence over all layers in the
             current suite.
 
-        Returns:
-        --------
+        Returns
+        -------
         A new `ConfigSuite` with `raw_config` as the first layer.
         """
         return ConfigSuite(
