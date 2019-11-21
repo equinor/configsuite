@@ -92,7 +92,9 @@ def _assert_valid_schema_level(schema):
 
     if not result.valid:
         for error in result.errors:
-            gen_err_msg = lambda error: "{} at {}".format(error.msg, error.key_path)
+
+            def gen_err_msg(error):
+                return "{} at {}".format(error.msg, error.key_path)
 
             if isinstance(error, configsuite.MissingKeyError):
                 raise KeyError(gen_err_msg(error))
