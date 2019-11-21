@@ -23,7 +23,7 @@ _Config Suite_ is the result of recognizing the complexity of software configura
 -   Context based validators and transformations.
 
 ## Documentation ##
-Check out the [documentation](https://configsuite.readthedocs.io/en/latest).
+Check out the [documentation](https://configsuite.readthedocs.io/en/stable).
 
 ## Future ##
 Have a look at the epics and issues in the _GitHub_ [repository](https://github.com/equinor/configsuite/issues).
