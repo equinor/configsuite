@@ -56,7 +56,7 @@ class TestContextValidators(unittest.TestCase):
 
     def test_context_validator_no_context_data_no_crash(self):
         raw_config = transactions.build_config()
-        raw_config["exhange_rates"] = "Tulips is all you need!"
+        raw_config["exchange_rates"] = "Tulips is all you need!"
         config_suite = configsuite.ConfigSuite(
             raw_config,
             transactions.build_schema(),
@@ -64,6 +64,7 @@ class TestContextValidators(unittest.TestCase):
         )
         self.assertFalse(config_suite.valid)
         self.assertEqual(1, len(config_suite.errors))
+        self.assertIsInstance(config_suite.errors[0], configsuite.InvalidTypeError)
 
     def test_context_validator_layers(self):
         bottom_layer = transactions.build_config()
