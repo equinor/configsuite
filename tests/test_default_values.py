@@ -146,17 +146,6 @@ class TestDefaultValues(unittest.TestCase):
             )
             self.assertTrue(err.msg.startswith("Is x a valid date"))
 
-    def test_default_and_required_not_allowed(self):
-        raw_config = car.build_config()
-        car_schema = car.build_schema()
-        car_schema[MK.Content]["tire"][MK.Content]["dimension"][MK.Required] = True
-
-        with self.assertRaises(ValueError) as error_context:
-            configsuite.ConfigSuite(raw_config, car_schema)
-        self.assertTrue(
-            str(error_context.exception).startswith("Default can not be Required")
-        )
-
     def test_not_allow_default_for_list(self):
         raw_config = car.build_all_default_config()
 

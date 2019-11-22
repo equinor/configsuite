@@ -40,11 +40,14 @@ def _check_allownone_type(schema_level):
     return True
 
 
-@configsuite.validator_msg("Non required types must allow None")
+@configsuite.validator_msg(
+    "Non required types must allow None or have non-None default"
+)
 def _check_allownone_required(schema_level):
     if isinstance(schema_level[MK.Type], types.BasicType):
         allow_none = schema_level.get(MK.AllowNone, False)
-        if not allow_none:
+        has_non_none_default = schema_level.get(MK.Default) is not None
+        if not allow_none and not has_non_none_default:
             return schema_level.get(MK.Required, True)
     return True
 
@@ -56,12 +59,10 @@ def _check_default_type(schema_level):
     return True
 
 
-@configsuite.validator_msg("Default can not be Required")
-def _check_default_not_required(schema_level):
-    if isinstance(schema_level[MK.Type], types.BasicType):
-        has_default = schema_level.get(MK.Default, False)
-        if has_default:
-            return not schema_level.get(MK.Required, True)
+@configsuite.validator_msg("Required can not have Default")
+def _check_required_not_default(schema_level):
+    if schema_level.get(MK.Required, True):
+        return MK.Default not in schema_level
     return True
 
 
@@ -71,7 +72,7 @@ _META_SCHEMA = {
         _check_allownone_type,
         _check_allownone_required,
         _check_default_type,
-        _check_default_not_required,
+        _check_required_not_default,
     ),
     MK.Content: {
         MK.Type: {MK.Type: types.Type},
