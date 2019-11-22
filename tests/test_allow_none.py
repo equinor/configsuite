@@ -61,19 +61,6 @@ class TestNotAllowNoneContainers(unittest.TestCase):
             "AllowNone can only be used for BasicType", str(error_context.exception)
         )
 
-    def test_not_required_implies_must_allow_none(self):
-        schema = computers.build_schema()
-        config = computers.build_config()
-
-        schema[MK.Content]["OS"][MK.Required] = False
-        schema[MK.Content]["OS"][MK.AllowNone] = False
-
-        with self.assertRaises(ValueError) as error_context:
-            configsuite.ConfigSuite(config, schema)
-        self.assertIn(
-            "Non required types must allow None", str(error_context.exception)
-        )
-
 
 class TestAllowNoneBasicType(unittest.TestCase):
     def test_basictype_explicit_none(self):
