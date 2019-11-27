@@ -44,12 +44,14 @@ def _check_allownone_type(schema_level):
     "Non required types must allow None or have non-None default"
 )
 def _check_allownone_required(schema_level):
-    if isinstance(schema_level[MK.Type], types.BasicType):
-        allow_none = schema_level.get(MK.AllowNone, False)
-        has_non_none_default = schema_level.get(MK.Default) is not None
-        if not allow_none and not has_non_none_default:
-            return schema_level.get(MK.Required, True)
-    return True
+    is_required = schema_level.get(MK.Required, True)
+    is_basic_type = isinstance(schema_level[MK.Type], types.BasicType)
+    if is_required or not is_basic_type:
+        return True
+
+    allow_none = schema_level.get(MK.AllowNone, False)
+    has_non_none_default = schema_level.get(MK.Default) is not None
+    return allow_none or has_non_none_default
 
 
 @configsuite.validator_msg("Default can only be used for BasicType")
