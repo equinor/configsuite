@@ -58,6 +58,13 @@ jobs:
     steps:
       - python_build:
           python_version: "3.7"
+  python-38:
+    docker:
+      - image: circleci/python:3.8
+    steps:
+      - python_build:
+          python_version: "3.8"
+
 
 workflows:
   build:
@@ -66,3 +73,4 @@ workflows:
       - python-35
       - python-36
       - python-37
+      - python-38
