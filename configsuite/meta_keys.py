@@ -18,13 +18,17 @@ in all copies or substantial portions of the Software.
 
 
 import enum
+import warnings
+
+
+_REQUIRED = "required"
 
 
 class MetaKeys(enum.Enum):
     Type = "string"
     Content = "content"
     Item = "item"
-    Required = "required"
+    Required = _REQUIRED
     ElementValidators = "element_validators"
     ContextValidators = "context_validators"
     Key = "key"
@@ -35,3 +39,16 @@ class MetaKeys(enum.Enum):
     LayerTransformation = "layer_transformation"
     AllowNone = "allow_none"
     Default = "default"
+
+    def __getattribute__(self, key):
+        return_value = super().__getattribute__(key)
+        if return_value == _REQUIRED:
+            warnings.warn(
+                "configsuite.MetaKeys.Required is deprecated. In particular "
+                "it is fully superseeded by combinations of "
+                "configsuite.MetaKeys.AllowNone and "
+                "configsuite.MetaKeys.Default.",
+                DeprecationWarning,
+            )
+
+        return return_value
