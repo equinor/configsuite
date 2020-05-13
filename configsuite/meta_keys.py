@@ -41,6 +41,7 @@ class MetaKeys(enum.Enum):
     Default = "default"
 
     def __getattribute__(self, key):
+        # pylint: disable=bad-super-call
         return_value = super(type(self), self).__getattribute__(key)
         if return_value == _REQUIRED:
             warnings.warn(
