@@ -41,7 +41,7 @@ class MetaKeys(enum.Enum):
     Default = "default"
 
     def __getattribute__(self, key):
-        return_value = super().__getattribute__(key)
+        return_value = super(type(self), self).__getattribute__(key)
         if return_value == _REQUIRED:
             warnings.warn(
                 "configsuite.MetaKeys.Required is deprecated. In particular "
