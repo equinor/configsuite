@@ -41,6 +41,13 @@ def _check_allownone_type(schema_level):
     return True
 
 
+@configsuite.validator_msg("Required can only be used for BasicType")
+def _check_required_type(schema_level):
+    if MK.Required in schema_level:
+        return isinstance(schema_level[MK.Type], types.BasicType)
+    return True
+
+
 @configsuite.validator_msg(
     "A type is not required only if it allows None or have a non-None default"
 )
@@ -73,8 +80,9 @@ _META_SCHEMA = {
     MK.Type: types.NamedDict,
     MK.ElementValidators: (
         _check_allownone_type,
-        _check_allownone_required,
+        _check_required_type,
         _check_default_type,
+        _check_allownone_required,
         _check_required_not_default,
     ),
     MK.Content: {

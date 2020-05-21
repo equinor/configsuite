@@ -114,7 +114,6 @@ def build_schema_with_definitions():
         MK.Content: {
             "definitions": {
                 MK.Type: types.Dict,
-                MK.Required: False,
                 MK.Content: {
                     MK.Key: {MK.Type: types.String},
                     MK.Value: {MK.Type: types.String},

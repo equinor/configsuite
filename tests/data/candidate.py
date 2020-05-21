@@ -29,7 +29,6 @@ def build_schema():
             "weight": {MK.Type: types.Number, MK.Required: False, MK.AllowNone: True},
             "current_job": {
                 MK.Type: types.NamedDict,
-                MK.Required: False,
                 MK.Content: {
                     "company_name": {MK.Type: types.String},
                     "position": {
