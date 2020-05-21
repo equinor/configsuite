@@ -546,6 +546,7 @@ in order for a configuration with ``None`` to pass.
                     "credit": {
                         MK.Type: types.Number,
                         MK.AllowNone: True,
+                        MK.Required: False,
                     },
                     "insured": {MK.Type: types.Bool},
                 },
