@@ -22,6 +22,7 @@ import unittest
 import six
 
 import configsuite
+from configsuite import MetaKeys as MK
 
 from . import data
 
@@ -174,6 +175,51 @@ class TestTypes(unittest.TestCase):
         err = config_suite.errors[0]
         self.assertIsInstance(err, configsuite.MissingKeyError)
         self.assertEqual(("playgrounds", 0), err.key_path)
+
+    def test_list_cannot_spec_required(self):
+        schema = {
+            MK.Type: configsuite.types.List,
+            MK.Content: {MK.Item: {MK.Type: configsuite.types.Integer}},
+        }
+        config_suite = configsuite.ConfigSuite([], schema)
+        self.assertTrue(config_suite.valid)
+
+        for req in (True, False):
+            schema[MK.Required] = req
+            with self.assertRaises(ValueError) as err:
+                configsuite.ConfigSuite([], schema)
+            self.assertIn("Required can only be used for BasicType", str(err.exception))
+
+    def test_named_dict_cannot_spec_required(self):
+        schema = {
+            MK.Type: configsuite.types.NamedDict,
+            MK.Content: {"key": {MK.Type: configsuite.types.Integer}},
+        }
+        config_suite = configsuite.ConfigSuite({"key": 42}, schema)
+        self.assertTrue(config_suite.valid)
+
+        for req in (True, False):
+            schema[MK.Required] = req
+            with self.assertRaises(ValueError) as err:
+                configsuite.ConfigSuite({"key": 42}, schema)
+            self.assertIn("Required can only be used for BasicType", str(err.exception))
+
+    def test_dict_cannot_spec_required(self):
+        schema = {
+            MK.Type: configsuite.types.Dict,
+            MK.Content: {
+                MK.Key: {MK.Type: configsuite.types.String},
+                MK.Value: {MK.Type: configsuite.types.String},
+            },
+        }
+        config_suite = configsuite.ConfigSuite({}, schema)
+        self.assertTrue(config_suite.valid)
+
+        for req in (True, False):
+            schema[MK.Required] = req
+            with self.assertRaises(ValueError) as err:
+                configsuite.ConfigSuite({}, schema)
+            self.assertIn("Required can only be used for BasicType", str(err.exception))
 
     def test_date(self):
         timestamp = datetime.datetime(2015, 1, 2, 3, 4, 5)

@@ -203,7 +203,6 @@ class TestDefaultValues(unittest.TestCase):
         car_schema = car.build_schema()
         schema_value_content = {
             MK.Type: types.Dict,
-            MK.Required: False,
             MK.Content: {
                 MK.Key: {
                     MK.Type: types.String,
@@ -226,7 +225,6 @@ class TestDefaultValues(unittest.TestCase):
         car_schema = car.build_schema()
         schema_value_content = {
             MK.Type: types.Dict,
-            MK.Required: False,
             MK.Content: {
                 MK.Key: {MK.Type: types.String},
                 MK.Value: {
