@@ -68,6 +68,7 @@ class TestAllowNoneBasicType(unittest.TestCase):
         config = computers.build_config()
 
         schema[MK.Content]["OS"][MK.AllowNone] = True
+        schema[MK.Content]["OS"][MK.Required] = False
 
         config["OS"] = None
         config_suite = configsuite.ConfigSuite(config, schema)
