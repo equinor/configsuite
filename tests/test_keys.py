@@ -68,7 +68,7 @@ class TestKeys(unittest.TestCase):
         self.assertTrue(config_suite.valid)
         self.assertEqual(None, config_suite.snapshot.weight)
 
-    def test_required_if_parent(self):
+    def test_required_child(self):
         raw_config = data.candidate.build_config()
         raw_config["current_job"].pop("company_name")
         config_suite = configsuite.ConfigSuite(
@@ -81,7 +81,7 @@ class TestKeys(unittest.TestCase):
         self.assertIsInstance(err, configsuite.MissingKeyError)
         self.assertEqual(("current_job",), err.key_path)
 
-    def test_optional_child_of_optional(self):
+    def test_optional_child(self):
         raw_config = data.candidate.build_config()
         raw_config["current_job"].pop("position")
         config_suite = configsuite.ConfigSuite(

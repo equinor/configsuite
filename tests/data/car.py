@@ -38,7 +38,6 @@ def build_schema():
             },
             "tire": {
                 MK.Type: types.NamedDict,
-                MK.Required: False,
                 MK.Content: {
                     "dimension": {
                         MK.Type: types.Number,
@@ -56,7 +55,6 @@ def build_schema():
             },
             "owner": {
                 MK.Type: types.Dict,
-                MK.Required: False,
                 MK.Content: {
                     MK.Key: {MK.Type: types.String},
                     MK.Value: {
@@ -75,7 +73,6 @@ def build_schema():
             },
             "incidents": {
                 MK.Type: types.List,
-                MK.Required: False,
                 MK.Content: {
                     MK.Item: {
                         MK.Type: types.NamedDict,
@@ -141,7 +138,11 @@ def extract_production_date(snapshot):
 
 
 def build_all_default_config():
-    return {"production_date": datetime.datetime(2000, 1, 1)}
+    return {
+        "production_date": datetime.datetime(2000, 1, 1),
+        "owner": {},
+        "incidents": [],
+    }
 
 
 def build_config():
