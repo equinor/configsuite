@@ -109,9 +109,7 @@ class TestNotAllowNoneVsDefault(unittest.TestCase):
 
         with self.assertRaises(ValueError) as error_context:
             configsuite.ConfigSuite({}, schema)
-        self.assertIn(
-            "Non required types must allow None", str(error_context.exception)
-        )
+        self.assertIn("A type is not required only if", str(error_context.exception))
 
     def test_allow_none_default_required(self):
         schema = {
@@ -142,14 +140,9 @@ class TestNotAllowNoneVsDefault(unittest.TestCase):
             },
         }
 
-        for value in (-1, 4, 1000, None):
-            suite = configsuite.ConfigSuite({"my_value": value}, schema)
-            self.assertTrue(suite.valid)
-            self.assertEqual(value, suite.snapshot.my_value)
-
-        suite = configsuite.ConfigSuite({}, schema)
-        self.assertFalse(suite.valid)
-        self.assertEqual(None, suite.snapshot.my_value)
+        with self.assertRaises(ValueError) as error_context:
+            configsuite.ConfigSuite({}, schema)
+        self.assertIn("A type is not required only if", str(error_context.exception))
 
     def test_disallow_none_default_required(self):
         schema = {
