@@ -1,0 +1,46 @@
+"""Copyright 2020 Equinor ASA and The Netherlands Organisation for
+Applied Scientific Research TNO.
+
+Licensed under the MIT license.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the conditions stated in the LICENSE file in the project root for
+details.
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+"""
+
+
+import unittest
+import warnings
+
+import configsuite
+from configsuite import MetaKeys as MK
+from configsuite import types
+
+
+class TestRequiredDeprecated(unittest.TestCase):
+    def test_required_deprecated(self):
+        schema = {
+            MK.Type: types.NamedDict,
+            MK.Content: {"some_key": {MK.Type: types.String, MK.Required: True}},
+        }
+        with self.assertWarns(DeprecationWarning) as w:
+            configsuite.ConfigSuite({}, schema)
+        self.assertEqual(__file__, w.filename)
+
+    def test_no_deprecation_warning_without_required(self):
+        schema = {
+            MK.Type: types.NamedDict,
+            MK.Content: {"some_key": {MK.Type: types.String, MK.AllowNone: False}},
+        }
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            configsuite.ConfigSuite({}, schema)
+            self.assertEqual(0, len(w))

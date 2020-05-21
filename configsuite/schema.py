@@ -19,6 +19,7 @@ in all copies or substantial portions of the Software.
 import copy
 import re
 import six
+import warnings
 
 import configsuite
 from configsuite import MetaKeys as MK
@@ -99,8 +100,27 @@ _META_SCHEMA = {
 }
 
 
-def assert_valid_schema(schema, allow_default=False):
-    assert_valid_schema_level(schema, allow_default=allow_default)
+_REQUIRED_DEPRECATION_MSG = (
+    "configsuite.MetaKeys.Required is deprecated. In particular "
+    "it is fully superseeded by combinations of "
+    "configsuite.MetaKeys.AllowNone and "
+    "configsuite.MetaKeys.Default. "
+    "See the documentation for more details."
+)
+
+
+def assert_valid_schema(schema):
+    with warnings.catch_warnings(record=True) as warnings_manager:
+        _assert_valid_schema(schema, allow_default=False)
+
+    if any(_REQUIRED_DEPRECATION_MSG == str(w.message) for w in warnings_manager):
+        warnings.warn(
+            _REQUIRED_DEPRECATION_MSG, DeprecationWarning, stacklevel=3,
+        )
+
+
+def _assert_valid_schema(schema, allow_default):
+    _assert_valid_schema_level(schema, allow_default=allow_default)
 
     level_type = schema[MK.Type]
     if isinstance(level_type, types.BasicType):
@@ -115,10 +135,13 @@ def assert_valid_schema(schema, allow_default=False):
         raise TypeError("Unknown base container: {}".format(schema))
 
 
-def assert_valid_schema_level(schema, allow_default):
+def _assert_valid_schema_level(schema, allow_default):
     level_schema = copy.deepcopy(schema)
     if MK.Content in level_schema:
         level_schema.pop(MK.Content)
+
+    if MK.Required in schema:
+        warnings.warn(_REQUIRED_DEPRECATION_MSG, DeprecationWarning)
 
     if MK.Default in schema and not allow_default:
         fmt = "Default value is only allowed for contents in NamedDict"
@@ -178,7 +201,7 @@ def _assert_valid_named_dict_schema(schema):
         _assert_dict_key(key)
 
     for value in content.values():
-        assert_valid_schema(value, allow_default=True)
+        _assert_valid_schema(value, allow_default=True)
 
 
 def _assert_valid_list_schema(schema):
@@ -199,7 +222,7 @@ def _assert_valid_list_schema(schema):
         )
         raise KeyError(err_msg)
 
-    assert_valid_schema(content[MK.Item], allow_default=False)
+    _assert_valid_schema(content[MK.Item], allow_default=False)
 
 
 def _assert_valid_dict_schema(schema):
@@ -221,5 +244,5 @@ def _assert_valid_dict_schema(schema):
         )
         raise KeyError(err_msg)
 
-    assert_valid_schema(content[MK.Key], allow_default=False)
-    assert_valid_schema(content[MK.Value], allow_default=False)
+    _assert_valid_schema(content[MK.Key], allow_default=False)
+    _assert_valid_schema(content[MK.Value], allow_default=False)
