@@ -28,7 +28,7 @@ if version == "0.0.0":
     try:
         from subprocess import check_output
 
-        version = str(check_output(["git", "describe"]).strip())
+        version = str(check_output(["git", "describe", "--tags"]).strip())
     finally:
         pass
 
