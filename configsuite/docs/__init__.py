@@ -43,7 +43,11 @@ def generate(schema, level=0):
     if schema[MK.Type] == types.NamedDict:
 
         def req_child_marker(key):
-            return "*" if schema[MK.Content][key].get(MK.Required, True) else ""
+            child_req = not (
+                schema[MK.Content][key].get(MK.AllowNone, False)
+                or schema[MK.Content][key].get(MK.Default, None) is not None
+            )
+            return "*" if child_req else ""
 
         docs += [
             "\n".join(
