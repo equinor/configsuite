@@ -75,7 +75,16 @@ def _check_required_not_default(schema_level):
     return True
 
 
-_META_SCHEMA = {
+_SCHEMA_LEVEL_DEFAULTS = {
+    MK.Required: True,
+    MK.AllowNone: False,
+    MK.Description: "",
+    MK.ElementValidators: (),
+    MK.ContextValidators: (),
+}
+
+
+META_SCHEMA = {
     MK.Type: types.NamedDict,
     MK.ElementValidators: (
         _check_allownone_type,
@@ -86,54 +95,101 @@ _META_SCHEMA = {
     ),
     MK.Content: {
         MK.Type: {MK.Type: types.Type},
-        MK.Required: {MK.Type: types.Bool, MK.Required: False},
-        MK.AllowNone: {MK.Type: types.Bool, MK.Required: False},
-        MK.Description: {MK.Type: types.String, MK.Required: False},
-        MK.Default: {MK.Type: _Anytype, MK.Required: False},
+        MK.Required: {
+            MK.Type: types.Bool,
+            MK.Required: False,
+            MK.Default: _SCHEMA_LEVEL_DEFAULTS[MK.Required],
+        },
+        MK.AllowNone: {
+            MK.Type: types.Bool,
+            MK.Required: False,
+            MK.Default: _SCHEMA_LEVEL_DEFAULTS[MK.AllowNone],
+        },
+        MK.Description: {
+            MK.Type: types.String,
+            MK.Required: False,
+            MK.Default: _SCHEMA_LEVEL_DEFAULTS[MK.Description],
+        },
+        MK.Default: {MK.Type: _Anytype, MK.Required: False, MK.AllowNone: True},
         MK.ElementValidators: {
             MK.Type: types.List,
-            MK.Required: False,
             MK.Content: {MK.Item: {MK.Type: types.Callable}},
         },
         MK.ContextValidators: {
             MK.Type: types.List,
-            MK.Required: False,
             MK.Content: {MK.Item: {MK.Type: types.Callable}},
         },
-        MK.Transformation: {MK.Type: types.Callable, MK.Required: False},
-        MK.ContextTransformation: {MK.Type: types.Callable, MK.Required: False},
-        MK.LayerTransformation: {MK.Type: types.Callable, MK.Required: False},
+        MK.Transformation: {
+            MK.Type: types.Callable,
+            MK.Required: False,
+            MK.AllowNone: True,
+        },
+        MK.ContextTransformation: {
+            MK.Type: types.Callable,
+            MK.Required: False,
+            MK.AllowNone: True,
+        },
+        MK.LayerTransformation: {
+            MK.Type: types.Callable,
+            MK.Required: False,
+            MK.AllowNone: True,
+        },
     },
 }
 
 
-def assert_valid_schema(schema, allow_default=False):
-    assert_valid_schema_level(schema, allow_default=allow_default)
+def assert_valid_schema(schema, allow_default=False, validate_named_keys=True):
+    _assert_valid_schema(schema, allow_default, validate_named_keys)
+
+
+def _assert_valid_schema(schema, allow_default, validate_named_keys):
+    _assert_valid_schema_level(schema, allow_default)
 
     level_type = schema[MK.Type]
     if isinstance(level_type, types.BasicType):
         return
     elif level_type == types.NamedDict:
-        _assert_valid_named_dict_schema(schema)
+        _assert_valid_named_dict_schema(schema, validate_named_keys)
     elif level_type == types.List:
-        _assert_valid_list_schema(schema)
+        _assert_valid_list_schema(schema, validate_named_keys)
     elif level_type == types.Dict:
-        _assert_valid_dict_schema(schema)
+        _assert_valid_dict_schema(schema, validate_named_keys)
     else:
         raise TypeError("Unknown base container: {}".format(schema))
 
 
-def assert_valid_schema_level(schema, allow_default):
-    level_schema = copy.deepcopy(schema)
-    if MK.Content in level_schema:
-        level_schema.pop(MK.Content)
+def _build_level_schema(schema):
+    schema = copy.deepcopy(schema)
+
+    # Make schema into a pure level schema
+    if MK.Content in schema:
+        schema.pop(MK.Content)
+
+    level_schema = copy.deepcopy(_SCHEMA_LEVEL_DEFAULTS)
+
+    # Discard ignore from default if not in level schema
+    if MK.Required not in schema:
+        level_schema.pop(MK.Required)
+
+    # Discard basic type defaults for non-basic types
+    if not isinstance(schema[MK.Type], types.BasicType):
+        for basic_key in (MK.Required, MK.Default, MK.AllowNone):
+            if basic_key in level_schema:
+                level_schema.pop(basic_key)
+
+    level_schema.update(schema)
+    return level_schema
+
+
+def _assert_valid_schema_level(schema, allow_default):
+    schema = _build_level_schema(schema)
 
     if MK.Default in schema and not allow_default:
         fmt = "Default value is only allowed for contents in NamedDict"
         raise ValueError(fmt)
 
-    level_validator = configsuite.Validator(_META_SCHEMA)
-    result = level_validator.validate(level_schema)
+    level_validator = configsuite.Validator(META_SCHEMA)
+    result = level_validator.validate(schema)
 
     if not result.valid:
         for error in result.errors:
@@ -170,7 +226,7 @@ def _assert_dict_key(key):
         )
 
 
-def _assert_valid_named_dict_schema(schema):
+def _assert_valid_named_dict_schema(schema, validate_keys):
     if MK.Content not in schema:
         err_msg = "{} schema has no {}: {}".format(
             types.NamedDict.name, MK.Content, schema
@@ -182,14 +238,15 @@ def _assert_valid_named_dict_schema(schema):
         err_msg = "Expected {} to be a dict, was {}".format(MK.Content, type(content))
         raise ValueError(err_msg)
 
-    for key in content.keys():
-        _assert_dict_key(key)
+    if validate_keys:
+        for key in content.keys():
+            _assert_dict_key(key)
 
     for value in content.values():
-        assert_valid_schema(value, allow_default=True)
+        _assert_valid_schema(value, True, validate_keys)
 
 
-def _assert_valid_list_schema(schema):
+def _assert_valid_list_schema(schema, validate_named_keys):
     if MK.Content not in schema:
         err_msg = "{} schema has no {}: {}".format(types.List.name, MK.Content, schema)
         raise KeyError(err_msg)
@@ -207,10 +264,10 @@ def _assert_valid_list_schema(schema):
         )
         raise KeyError(err_msg)
 
-    assert_valid_schema(content[MK.Item], allow_default=False)
+    _assert_valid_schema(content[MK.Item], False, validate_named_keys)
 
 
-def _assert_valid_dict_schema(schema):
+def _assert_valid_dict_schema(schema, validate_named_keys):
     if MK.Content not in schema:
         err_msg = "{} schema has no {}: {}".format(types.Dict.name, MK.Content, schema)
         raise KeyError(err_msg)
@@ -229,5 +286,5 @@ def _assert_valid_dict_schema(schema):
         )
         raise KeyError(err_msg)
 
-    assert_valid_schema(content[MK.Key], allow_default=False)
-    assert_valid_schema(content[MK.Value], allow_default=False)
+    _assert_valid_schema(content[MK.Key], False, validate_named_keys)
+    _assert_valid_schema(content[MK.Value], False, validate_named_keys)
