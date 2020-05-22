@@ -179,9 +179,7 @@ class TestTypes(unittest.TestCase):
     def test_list_cannot_spec_required(self):
         schema = {
             MK.Type: configsuite.types.List,
-            MK.Content: {
-                MK.Item: {MK.Type: configsuite.types.Integer}
-            },
+            MK.Content: {MK.Item: {MK.Type: configsuite.types.Integer}},
         }
         config_suite = configsuite.ConfigSuite([], schema)
         self.assertTrue(config_suite.valid)
@@ -195,9 +193,7 @@ class TestTypes(unittest.TestCase):
     def test_named_dict_cannot_spec_required(self):
         schema = {
             MK.Type: configsuite.types.NamedDict,
-            MK.Content: {
-                "key": {MK.Type: configsuite.types.Integer}
-            },
+            MK.Content: {"key": {MK.Type: configsuite.types.Integer}},
         }
         config_suite = configsuite.ConfigSuite({"key": 42}, schema)
         self.assertTrue(config_suite.valid)
