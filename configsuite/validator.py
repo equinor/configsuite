@@ -109,11 +109,19 @@ class Validator(object):
         return len(unknown_keys) == 0
 
     def _identify_missing_dict_keys(self, config, content_schema):
-        optional_keys = [
-            key
-            for key in content_schema
-            if not content_schema[key].get(MK.Required, True)
-        ]
+        optional_keys = []
+        for key in content_schema:
+            deduced_required = not (
+                content_schema[key].get(MK.AllowNone, False)
+                or content_schema[key].get(MK.Default, None) is not None
+            )
+
+            required = content_schema[key].get(MK.Required, True)
+            assert required == deduced_required
+
+            if not deduced_required:
+                optional_keys.append(key)
+
         missing_keys = (
             set(content_schema.keys()) - set(config.keys()) - set(optional_keys)
         )
