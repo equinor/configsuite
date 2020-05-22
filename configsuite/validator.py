@@ -116,9 +116,6 @@ class Validator(object):
                 or content_schema[key].get(MK.Default, None) is not None
             )
 
-            required = content_schema[key].get(MK.Required, True)
-            assert required == deduced_required
-
             if not deduced_required:
                 optional_keys.append(key)
 
