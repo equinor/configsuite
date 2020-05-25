@@ -52,6 +52,13 @@ class ConfigSuite(object):
         Callable that extracts the context used for transformations. The
         callable is given a snapshot of the configuration as argument. Defaults
         to the constant function always returning `None`.
+    deduce_required: bool, optional
+        Boolean that enables future behaviour of deducing whether a schema
+        entry is `required` by inspecting `allow_none` and `default`. In
+        particular, using `required` in schemas as well as not setting
+        `deduce_required=True` is deprecated.
+
+
 
     Raises
     ------
@@ -68,8 +75,9 @@ class ConfigSuite(object):
         layers=(),
         extract_validation_context=lambda snapshot: None,
         extract_transformation_context=lambda snapshot: None,
+        deduce_required=False,
     ):
-        assert_valid_schema(schema)
+        assert_valid_schema(schema, deduce_required)
         self._layers = tuple(
             [copy.deepcopy(layer) for layer in tuple(layers) + (raw_config,)]
         )

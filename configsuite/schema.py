@@ -139,42 +139,71 @@ _META_SCHEMA = {
 }
 
 
+def _build_meta_schema(deduce_required):
+    meta_schema = copy.deepcopy(_META_SCHEMA)
+    if deduce_required:
+        meta_schema[MK.ElementValidators] = (
+            _check_allownone_type,
+            _check_required_type,
+            _check_default_type,
+        )
+
+    return meta_schema
+
+
 _REQUIRED_DEPRECATION_MSG = (
-    "configsuite.MetaKeys.Required is deprecated. In particular "
-    "it is fully superseeded by combinations of "
-    "configsuite.MetaKeys.AllowNone and "
-    "configsuite.MetaKeys.Default. "
+    "Specifying whether elements are required directly is deprecated. "
+    "Please remove them from your schema to be adopt to future behaviour. "
     "See the documentation for more details."
 )
 
 
-def assert_valid_schema(schema):
+_EXPLICIT_REQUIRED_DEPRECATION_MSG = (
+    "Specifying whether elements are required directly is deprecated. Use "
+    "`ConfigSuite(..., deduce_required=True)` to adopt to future behaviour. "
+    "See the documentation for more details."
+)
+
+
+def assert_valid_schema(schema, deduce_required):
     with warnings.catch_warnings(record=True):
         _assert_valid_schema(
-            _META_SCHEMA, allow_default=False, validate_named_keys=False
+            _META_SCHEMA,
+            allow_default=False,
+            validate_named_keys=False,
+            deduce_required=False,
         )
 
     with warnings.catch_warnings(record=True) as warnings_manager:
-        _assert_valid_schema(schema, allow_default=False, validate_named_keys=True)
+        _assert_valid_schema(
+            schema,
+            allow_default=False,
+            validate_named_keys=True,
+            deduce_required=deduce_required,
+        )
 
-    if any(_REQUIRED_DEPRECATION_MSG == str(w.message) for w in warnings_manager):
+    if not deduce_required:
+        warnings.warn(
+            _EXPLICIT_REQUIRED_DEPRECATION_MSG, DeprecationWarning, stacklevel=3,
+        )
+    elif any(_REQUIRED_DEPRECATION_MSG == str(w.message) for w in warnings_manager):
         warnings.warn(
             _REQUIRED_DEPRECATION_MSG, DeprecationWarning, stacklevel=3,
         )
 
 
-def _assert_valid_schema(schema, allow_default, validate_named_keys):
-    _assert_valid_schema_level(schema, allow_default)
+def _assert_valid_schema(schema, allow_default, validate_named_keys, deduce_required):
+    _assert_valid_schema_level(schema, allow_default, deduce_required)
 
     level_type = schema[MK.Type]
     if isinstance(level_type, types.BasicType):
         return
     elif level_type == types.NamedDict:
-        _assert_valid_named_dict_schema(schema, validate_named_keys)
+        _assert_valid_named_dict_schema(schema, validate_named_keys, deduce_required)
     elif level_type == types.List:
-        _assert_valid_list_schema(schema, validate_named_keys)
+        _assert_valid_list_schema(schema, validate_named_keys, deduce_required)
     elif level_type == types.Dict:
-        _assert_valid_dict_schema(schema, validate_named_keys)
+        _assert_valid_dict_schema(schema, validate_named_keys, deduce_required)
     else:
         raise TypeError("Unknown base container: {}".format(schema))
 
@@ -202,7 +231,7 @@ def _build_level_schema(schema):
     return level_schema
 
 
-def _assert_valid_schema_level(schema, allow_default):
+def _assert_valid_schema_level(schema, allow_default, deduce_required):
     schema = _build_level_schema(schema)
     if MK.Required in schema:
         warnings.warn(_REQUIRED_DEPRECATION_MSG, DeprecationWarning)
@@ -211,7 +240,7 @@ def _assert_valid_schema_level(schema, allow_default):
         fmt = "Default value is only allowed for contents in NamedDict"
         raise ValueError(fmt)
 
-    level_validator = configsuite.Validator(_META_SCHEMA)
+    level_validator = configsuite.Validator(_build_meta_schema(deduce_required))
     result = level_validator.validate(schema)
 
     if not result.valid:
@@ -249,7 +278,7 @@ def _assert_dict_key(key):
         )
 
 
-def _assert_valid_named_dict_schema(schema, validate_keys):
+def _assert_valid_named_dict_schema(schema, validate_keys, deduce_required):
     if MK.Content not in schema:
         err_msg = "{} schema has no {}: {}".format(
             types.NamedDict.name, MK.Content, schema
@@ -266,10 +295,10 @@ def _assert_valid_named_dict_schema(schema, validate_keys):
             _assert_dict_key(key)
 
     for value in content.values():
-        _assert_valid_schema(value, True, validate_keys)
+        _assert_valid_schema(value, True, validate_keys, deduce_required)
 
 
-def _assert_valid_list_schema(schema, validate_named_keys):
+def _assert_valid_list_schema(schema, validate_named_keys, deduce_required):
     if MK.Content not in schema:
         err_msg = "{} schema has no {}: {}".format(types.List.name, MK.Content, schema)
         raise KeyError(err_msg)
@@ -287,10 +316,10 @@ def _assert_valid_list_schema(schema, validate_named_keys):
         )
         raise KeyError(err_msg)
 
-    _assert_valid_schema(content[MK.Item], False, validate_named_keys)
+    _assert_valid_schema(content[MK.Item], False, validate_named_keys, deduce_required)
 
 
-def _assert_valid_dict_schema(schema, validate_named_keys):
+def _assert_valid_dict_schema(schema, validate_named_keys, deduce_required):
     if MK.Content not in schema:
         err_msg = "{} schema has no {}: {}".format(types.Dict.name, MK.Content, schema)
         raise KeyError(err_msg)
@@ -309,5 +338,5 @@ def _assert_valid_dict_schema(schema, validate_named_keys):
         )
         raise KeyError(err_msg)
 
-    _assert_valid_schema(content[MK.Key], False, validate_named_keys)
-    _assert_valid_schema(content[MK.Value], False, validate_named_keys)
+    _assert_valid_schema(content[MK.Key], False, validate_named_keys, deduce_required)
+    _assert_valid_schema(content[MK.Value], False, validate_named_keys, deduce_required)

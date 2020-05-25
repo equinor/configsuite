@@ -26,7 +26,7 @@ from configsuite import types
 
 
 class TestRequiredDeprecated(unittest.TestCase):
-    def test_required_deprecated(self):
+    def test_explicit_required_is_deprecated(self):
         schema = {
             MK.Type: types.NamedDict,
             MK.Content: {"some_key": {MK.Type: types.String, MK.Required: True}},
@@ -35,13 +35,47 @@ class TestRequiredDeprecated(unittest.TestCase):
             configsuite.ConfigSuite({}, schema)
             self.assertEqual(1, len(wc))
             self.assertEqual(__file__, wc[0].filename)
+            self.assertIn(
+                "Use `ConfigSuite(..., deduce_required=True)`", str(wc[0].message)
+            )
 
-    def test_no_deprecation_warning_without_required(self):
+    def test_specifying_required_is_deprecated_when_deducing(self):
         schema = {
             MK.Type: types.NamedDict,
-            MK.Content: {"some_key": {MK.Type: types.String, MK.AllowNone: False}},
+            MK.Content: {"some_key": {MK.Type: types.String, MK.Required: True}},
         }
         with warnings.catch_warnings(record=True) as wc:
-            warnings.simplefilter("always")
-            configsuite.ConfigSuite({}, schema)
+            configsuite.ConfigSuite({}, schema, deduce_required=True)
+            self.assertEqual(1, len(wc))
+            self.assertEqual(__file__, wc[0].filename)
+            self.assertIn("Please remove them from your schema", str(wc[0].message))
+
+    def test_no_deprecation_warning_when_deducing(self):
+        schema = {
+            MK.Type: types.NamedDict,
+            MK.Content: {"some_key": {MK.Type: types.String}},
+        }
+        with warnings.catch_warnings(record=True) as wc:
+            suite = configsuite.ConfigSuite({}, schema, deduce_required=True)
+            self.assertFalse(suite.valid)
+            self.assertEqual(0, len(wc))
+
+    def test_no_error_when_deducing_from_allow_none(self):
+        schema = {
+            MK.Type: types.NamedDict,
+            MK.Content: {"some_key": {MK.Type: types.String, MK.AllowNone: True}},
+        }
+        with warnings.catch_warnings(record=True) as wc:
+            suite = configsuite.ConfigSuite({}, schema, deduce_required=True)
+            self.assertTrue(suite.valid)
+            self.assertEqual(0, len(wc))
+
+    def test_no_error_when_deducing_from_default(self):
+        schema = {
+            MK.Type: types.NamedDict,
+            MK.Content: {"some_key": {MK.Type: types.String, MK.Default: "A string"}},
+        }
+        with warnings.catch_warnings(record=True) as wc:
+            suite = configsuite.ConfigSuite({}, schema, deduce_required=True)
+            self.assertTrue(suite.valid)
             self.assertEqual(0, len(wc))
