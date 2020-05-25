@@ -17,6 +17,7 @@ in all copies or substantial portions of the Software.
 """
 
 
+import sys
 import unittest
 import warnings
 
@@ -26,6 +27,9 @@ from configsuite import types
 
 
 class TestRequiredDeprecated(unittest.TestCase):
+    @unittest.skipIf(
+        sys.version_info < (3, 0), reason="requires python3",
+    )
     def test_required_deprecated(self):
         schema = {
             MK.Type: types.NamedDict,
