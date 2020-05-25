@@ -17,7 +17,6 @@ in all copies or substantial portions of the Software.
 """
 
 
-import sys
 import unittest
 import warnings
 
@@ -27,24 +26,22 @@ from configsuite import types
 
 
 class TestRequiredDeprecated(unittest.TestCase):
-    @unittest.skipIf(
-        sys.version_info < (3, 0), reason="requires python3",
-    )
     def test_required_deprecated(self):
         schema = {
             MK.Type: types.NamedDict,
             MK.Content: {"some_key": {MK.Type: types.String, MK.Required: True}},
         }
-        with self.assertWarns(DeprecationWarning) as w:
+        with warnings.catch_warnings(record=True) as wc:
             configsuite.ConfigSuite({}, schema)
-        self.assertEqual(__file__, w.filename)
+            self.assertEqual(1, len(wc))
+            self.assertEqual(__file__, wc[0].filename)
 
     def test_no_deprecation_warning_without_required(self):
         schema = {
             MK.Type: types.NamedDict,
             MK.Content: {"some_key": {MK.Type: types.String, MK.AllowNone: False}},
         }
-        with warnings.catch_warnings(record=True) as w:
+        with warnings.catch_warnings(record=True) as wc:
             warnings.simplefilter("always")
             configsuite.ConfigSuite({}, schema)
-            self.assertEqual(0, len(w))
+            self.assertEqual(0, len(wc))
