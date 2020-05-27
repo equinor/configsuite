@@ -517,14 +517,9 @@ also are invalid.
 Allow None
 ----------
 
-For certain configurations it may be reasonable for the user to provide
-``None`` as the value. The ``None`` is a specific value in the eyes of
-``ConfigSuite`` as it is also the value when a value hasn't been provided.
-As such, the schema must be specifically declared to allow the user to set
-``None`` in order for a configuration to be valid if it contains ``None``.
-
-The ``AllowNone`` type is only valid for ``BasicType``'s, not for containers.
-Setting ``AllowNone`` to ``True`` for anything but ``BasicType`` will result
+For certain configurations it may be reasonable to provide ``None`` as the
+value. The ``AllowNone`` type is only valid for ``BasicType``'s, not for
+containers.  Setting ``AllowNone`` for anything but ``BasicType`` will result
 in an invalid schema.
 
 Let us see how the owner section of the ``cars`` schema could be configured
