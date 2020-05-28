@@ -24,6 +24,7 @@ A guide through the universe of *Config Suite*.
     user_guide/introduction
     user_guide/getting_started
     user_guide/advanced
+    user_guide/deprecated_behaviour
 
 
 Additional examples
