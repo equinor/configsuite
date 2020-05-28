@@ -32,6 +32,17 @@ Additional examples
 
 For additional examples we refer the reader to the `test data <https://github.com/equinor/configsuite/tree/master/tests/data>`_.
 
+Release Notes
+-------------
+
+An overview of the *Config Suite* releases.
+
+.. toctree::
+    :maxdepth: 2
+
+    release_notes
+
+
 The API Documentation
 ---------------------
 
