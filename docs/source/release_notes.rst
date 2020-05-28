@@ -13,6 +13,9 @@ Release Notes
 dev
 ---
 
+0.6.0 (2020-05-28)
+------------------
+
 **New features**
  - Specify elements to be allowed to take None as value
  - Specify default values for elements in the schema
