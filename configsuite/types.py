@@ -129,7 +129,7 @@ def validator_msg(msg):
 
 
 BasicType = collections.namedtuple("Type", ["name", "validate"])
-Collection = collections.namedtuple("Type", ["name", "validate"])
+Collection = collections.namedtuple("Type", ["name", "validate", "create_empty"])
 
 
 def _type_eq(self, other):
@@ -184,9 +184,9 @@ def _is_datetime(x):
     return isinstance(x, datetime.datetime)
 
 
-NamedDict = Collection("named_dict", _is_pydict)
-Dict = Collection("dict", _is_pydict)
-List = Collection("list", _is_list)
+NamedDict = Collection("named_dict", _is_pydict, dict)
+Dict = Collection("dict", _is_pydict, dict)
+List = Collection("list", _is_list, tuple)
 String = BasicType("string", _is_string)
 Integer = BasicType("integer", _is_integer)
 Number = BasicType("number", _is_number)

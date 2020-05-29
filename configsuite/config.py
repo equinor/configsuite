@@ -219,24 +219,29 @@ class ConfigSuite(object):
     def _build_initial_named_dict_merged_config(self, layers, schema):
         rec = self._build_initial_merged_config
         content_schema = schema[MK.Content]
-        config = {}
-        all_keys = set((key for layer in layers for key in layer.keys()))
-        keys_with_default = set(
-            key
-            for key, val in content_schema.items()
-            if MK.Default in val or val[MK.Type] == configsuite.types.NamedDict
-        )
-        all_keys.update(keys_with_default)
 
-        for key in all_keys:
+        def is_collection(schema_type):
+            return isinstance(schema_type, configsuite.types.Collection)
+
+        def is_defaultable(schema_item):
+            return MK.Default in schema_item or is_collection(schema_item[MK.Type])
+
+        layer_keys = set((key for layer in layers for key in layer.keys()))
+        defaultable_keys = set(
+            key for key, val in content_schema.items() if is_defaultable(val)
+        )
+
+        config = {}
+        for key in layer_keys | defaultable_keys:
             child_layers = tuple([layer[key] for layer in layers if key in layer])
-            if key in content_schema:
-                if isinstance(
-                    content_schema[key][MK.Type], configsuite.types.BasicType
-                ):
-                    child_layers = (content_schema[key].get(MK.Default),) + child_layers
-                elif content_schema[key][MK.Type] == configsuite.types.NamedDict:
-                    child_layers = ({},) + child_layers
+
+            if key in defaultable_keys:
+                key_type = content_schema[key][MK.Type]
+                if is_collection(key_type):
+                    default = key_type.create_empty()
+                else:
+                    default = content_schema[key].get(MK.Default)
+                child_layers = (default,) + child_layers
 
             if len(child_layers) == 0:
                 continue

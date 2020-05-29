@@ -43,7 +43,7 @@ class TestLayers(unittest.TestCase):
         villains = {"villains": {"Eobard Thawne": 11, "Lux": 3}}
 
         hero_config = configsuite.ConfigSuite(heroes, schema)
-        self.assertFalse(hero_config.valid)
+        self.assertTrue(hero_config.valid)
         hero_villains_config = hero_config.push(villains)
         self.assertTrue(hero_villains_config.valid)
 

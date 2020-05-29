@@ -165,6 +165,36 @@ class TestTypes(unittest.TestCase):
                 self.assertEqual(plgr["name"], config.playgrounds[idx].name)
                 self.assertEqual(plgr["score"], config.playgrounds[idx].score)
 
+    def test_containers_in_named_dicts(self):
+        schema = {
+            MK.Type: configsuite.types.NamedDict,
+            MK.Content: {
+                "list": {
+                    MK.Type: configsuite.types.List,
+                    MK.Content: {MK.Item: {MK.Type: configsuite.types.Number}},
+                },
+                "dict": {
+                    MK.Type: configsuite.types.Dict,
+                    MK.Content: {
+                        MK.Key: {MK.Type: configsuite.types.String},
+                        MK.Value: {MK.Type: configsuite.types.Number},
+                    },
+                },
+                "named_dict": {
+                    MK.Type: configsuite.types.NamedDict,
+                    MK.Content: {
+                        "a": {MK.Type: configsuite.types.Number, MK.Default: 0}
+                    },
+                },
+            },
+        }
+
+        suite = configsuite.ConfigSuite({}, schema, deduce_required=True)
+        self.assertTrue(suite.valid, suite.errors)
+        self.assertEqual((), suite.snapshot.list)
+        self.assertEqual((), suite.snapshot.dict)
+        self.assertEqual(0, suite.snapshot.named_dict.a)
+
     def test_list_errors(self):
         raw_config = data.pets.build_config()
         raw_config["playgrounds"] = [{"name": "faulty grounds"}]
