@@ -80,7 +80,7 @@ class TestReadable(unittest.TestCase):
         self.assertTrue(layered_config.readable)
         self.assertTrue(layered_config.valid)
 
-    def test_readable_missing_container(self):
+    def test_readable_defaulted_container(self):
         schema = data.hero.build_schema()
 
         heroes = {
@@ -92,4 +92,4 @@ class TestReadable(unittest.TestCase):
         }
         config = configsuite.ConfigSuite(heroes, schema)
         self.assertTrue(config.readable)
-        self.assertFalse(config.valid)
+        self.assertTrue(config.valid)
