@@ -13,6 +13,13 @@ Release Notes
 dev
 ---
 
+**Improvements**
+ - Add empty line between keys and values in auto generated rst documentation
+   to avoid warning on empty descriptions
+
+**Bugfix**
+ - Default all containers to the empty container
+
 0.6.0 (2020-05-28)
 ------------------
 
