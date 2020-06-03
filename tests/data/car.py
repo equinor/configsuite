@@ -138,11 +138,7 @@ def extract_production_date(snapshot):
 
 
 def build_all_default_config():
-    return {
-        "production_date": datetime.datetime(2000, 1, 1),
-        "owner": {},
-        "incidents": [],
-    }
+    return {"production_date": datetime.datetime(2000, 1, 1)}
 
 
 def build_config():
