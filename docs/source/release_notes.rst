@@ -13,6 +13,9 @@ Release Notes
 dev
 ---
 
+0.6.1 (2020-06-03)
+------------------
+
 **Improvements**
  - Add empty line between keys and values in auto generated rst documentation
    to avoid warning on empty descriptions
