@@ -74,6 +74,7 @@ def generate(schema, level=0):
                 [
                     indent + "**<key>:**",
                     generate(schema[MK.Content][MK.Key], level=level + 2),
+                    "",
                     indent + "**<value>:**",
                     generate(schema[MK.Content][MK.Value], level=level + 2),
                 ]

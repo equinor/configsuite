@@ -195,6 +195,7 @@ pet to better be able to find a matching pet owner.
             Name of the veterinary.
 
             :type: string
+
     **<value>:**
             Your score of the vet.
 
