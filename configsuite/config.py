@@ -89,6 +89,7 @@ class ConfigSuite(object):
         self._valid = True
         self._errors = ()
         self._snapshot = None
+        self._deduce_required = deduce_required
 
         self._cached_merged_config = self._build_merged_config()
         if self._readable:
@@ -158,6 +159,7 @@ class ConfigSuite(object):
             layers=self._layers,
             extract_validation_context=self._extract_validation_context,
             extract_transformation_context=self._extract_transformation_context,
+            deduce_required=self._deduce_required,
         )
 
     @property

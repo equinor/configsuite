@@ -79,3 +79,21 @@ class TestRequiredDeprecated(unittest.TestCase):
             suite = configsuite.ConfigSuite({}, schema, deduce_required=True)
             self.assertTrue(suite.valid)
             self.assertEqual(0, len(wc))
+
+    def test_no_error_when_deducing_with_push(self):
+        schema = {
+            MK.Type: types.NamedDict,
+            MK.Content: {
+                "not_required": {MK.Type: types.Integer, MK.AllowNone: True},
+                "a_required_string": {MK.Type: types.String},
+            },
+        }
+        config = {"a_required_string": "a_string"}
+
+        with warnings.catch_warnings(record=True) as wc:
+            basic_config = configsuite.ConfigSuite(config, schema, deduce_required=True)
+            self.assertTrue(basic_config.valid)
+
+            basic_config = basic_config.push({"not_required": 10})
+            self.assertTrue(basic_config.valid)
+            self.assertEqual(0, len(wc))
