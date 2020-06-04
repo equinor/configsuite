@@ -109,7 +109,7 @@ class TestNotAllowNoneVsDefault(unittest.TestCase):
 
         with self.assertRaises(ValueError) as error_context:
             configsuite.ConfigSuite({}, schema)
-        self.assertIn("A type is not required only if", str(error_context.exception))
+        self.assertIn("A schema element can be required", str(error_context.exception))
 
     def test_allow_none_default_required(self):
         schema = {
@@ -142,7 +142,7 @@ class TestNotAllowNoneVsDefault(unittest.TestCase):
 
         with self.assertRaises(ValueError) as error_context:
             configsuite.ConfigSuite({}, schema)
-        self.assertIn("A type is not required only if", str(error_context.exception))
+        self.assertIn("A schema element can be required", str(error_context.exception))
 
     def test_disallow_none_default_required(self):
         schema = {
