@@ -49,7 +49,8 @@ def _check_required_type(schema_level):
 
 
 @configsuite.validator_msg(
-    "A type is not required only if it allows None or have a non-None default"
+    "A schema element can be required if and only if the schema element does "
+    "not allow None as a value and defaults to None"
 )
 def _check_allownone_required(schema_level):
     if not isinstance(schema_level[MK.Type], types.BasicType):
