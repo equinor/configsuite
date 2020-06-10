@@ -13,6 +13,9 @@ Release Notes
 dev
 ---
 
+0.6.2 (2020-06-10)
+------------------
+
 **Improvements**
  - Better validation message for incompatible required value
 
