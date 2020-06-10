@@ -13,6 +13,12 @@ Release Notes
 dev
 ---
 
+**Improvements**
+ - Better validation message for incompatible required value
+
+**Bugfix**
+ - Pass on `deduce_required` when pushing
+
 0.6.1 (2020-06-03)
 ------------------
 
