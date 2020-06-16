@@ -135,12 +135,17 @@ META_SCHEMA = {
             MK.Required: False,
             MK.AllowNone: True,
         },
+        MK.Content: {MK.Type: _Anytype},
     },
 }
 
 
-def _build_meta_schema(deduce_required):
+def _build_meta_schema(deduce_required, basic_type):
     meta_schema = copy.deepcopy(META_SCHEMA)
+
+    if basic_type:
+        meta_schema[MK.Content].pop(MK.Content)
+
     if deduce_required:
         meta_schema[MK.ElementValidators] = (
             _check_allownone_type,
@@ -204,11 +209,6 @@ def _assert_valid_schema(schema, allow_default, validate_named_keys, deduce_requ
 
 def _build_level_schema(schema):
     schema = copy.deepcopy(schema)
-
-    # Make schema into a pure level schema
-    if MK.Content in schema:
-        schema.pop(MK.Content)
-
     level_schema = copy.deepcopy(_SCHEMA_LEVEL_DEFAULTS)
 
     # Discard ignore from default if not in level schema
@@ -235,7 +235,9 @@ def _assert_valid_schema_level(schema, allow_default, deduce_required):
         fmt = "Default value is only allowed for contents in NamedDict"
         raise ValueError(fmt)
 
-    level_validator = configsuite.Validator(_build_meta_schema(deduce_required))
+    is_basic_type = isinstance(schema.get(MK.Type), types.BasicType)
+    meta_schema = _build_meta_schema(deduce_required, is_basic_type)
+    level_validator = configsuite.Validator(meta_schema)
     result = level_validator.validate(schema)
 
     if not result.valid:

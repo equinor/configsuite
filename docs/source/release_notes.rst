@@ -13,6 +13,9 @@ Release Notes
 dev
 ---
 
+**Improvements**
+ - Validate that content is specified in schema if and only if element is a container.
+
 **Deprecations**
  - Drop Python 2.7 support
 

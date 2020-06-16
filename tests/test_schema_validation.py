@@ -99,3 +99,17 @@ class TestSchemaValidation(unittest.TestCase):
         schema[MK.Content]["dubious"] = "content"
         with self.assertRaises(KeyError):
             configsuite.ConfigSuite(raw_config, schema)
+
+    def test_basic_type_with_content_invalid(self):
+        schema = data.candy_bag.build_schema()
+        schema[MK.Content][MK.Item][MK.Content]["price"][MK.Content] = {}
+        with self.assertRaises(KeyError) as err:
+            configsuite.ConfigSuite({}, schema)
+        self.assertIn("Unknown key: MetaKeys.Content at ()", str(err.exception))
+
+    def test_container_no_content_invalid(self):
+        schema = data.candy_bag.build_schema()
+        schema.pop(MK.Content)
+        with self.assertRaises(KeyError) as err:
+            configsuite.ConfigSuite({}, schema)
+        self.assertIn("Missing key: MetaKeys.Content at ()", str(err.exception))
