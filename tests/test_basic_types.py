@@ -1,4 +1,4 @@
-"""Copyright 2018 Equinor ASA and The Netherlands Organisation for
+"""Copyright 2020 Equinor ASA and The Netherlands Organisation for
 Applied Scientific Research TNO.
 
 Licensed under the MIT license.
@@ -26,7 +26,7 @@ from configsuite import MetaKeys as MK
 from . import data
 
 
-class TestTypes(unittest.TestCase):
+class TestBasicTypes(unittest.TestCase):
     def test_name_pet_accepted(self):
         raw_config = data.pets.build_config()
         config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
@@ -57,28 +57,6 @@ class TestTypes(unittest.TestCase):
             self.assertEqual(
                 raw_config["pet"]["favourite_food"], config.pet.favourite_food
             )
-
-    def test_invalid_base_dict(self):
-        for raw_config in [14, None, [{"name": "Markus"}], ()]:
-            config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
-            self.assertFalse(config_suite.valid)
-
-            self.assertEqual(1, len(config_suite.errors))
-            err = config_suite.errors[0]
-            self.assertIsInstance(err, configsuite.InvalidTypeError)
-            self.assertEqual((), err.key_path)
-
-    def test_invalid_dict(self):
-        for pet in [14, None, [{"name": "Markus"}], ()]:
-            raw_config = data.pets.build_config()
-            raw_config["pet"] = pet
-            config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
-            self.assertFalse(config_suite.valid)
-
-            self.assertEqual(1, len(config_suite.errors))
-            err = config_suite.errors[0]
-            self.assertIsInstance(err, configsuite.InvalidTypeError)
-            self.assertEqual(("pet",), err.key_path)
 
     def test_string(self):
         for strval in ["fdnsjk", "", "str4thewin", u"ustr", True, [], 1, 1.2, {}, None]:
@@ -148,108 +126,6 @@ class TestTypes(unittest.TestCase):
                 self.assertIsInstance(err, configsuite.InvalidTypeError)
                 self.assertEqual(("pet", "likeable"), err.key_path)
 
-    def test_list(self):
-        playgrounds = [{"name": "superfun", "score": 1}, {"name": "Hell", "score": 99}]
-
-        for end_idx, _ in enumerate(playgrounds):
-            raw_config = data.pets.build_config()
-            raw_config["playgrounds"] = playgrounds[:end_idx]
-            config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
-
-            self.assertTrue(config_suite.valid, "Errors: %r" % (config_suite.errors,))
-            config = config_suite.snapshot
-            self.assertEqual(end_idx, len(config.playgrounds))
-
-            for idx, plgr in enumerate(playgrounds[:end_idx]):
-                self.assertEqual(plgr["name"], config.playgrounds[idx].name)
-                self.assertEqual(plgr["score"], config.playgrounds[idx].score)
-
-    def test_containers_in_named_dicts(self):
-        schema = {
-            MK.Type: configsuite.types.NamedDict,
-            MK.Content: {
-                "list": {
-                    MK.Type: configsuite.types.List,
-                    MK.Content: {MK.Item: {MK.Type: configsuite.types.Number}},
-                },
-                "dict": {
-                    MK.Type: configsuite.types.Dict,
-                    MK.Content: {
-                        MK.Key: {MK.Type: configsuite.types.String},
-                        MK.Value: {MK.Type: configsuite.types.Number},
-                    },
-                },
-                "named_dict": {
-                    MK.Type: configsuite.types.NamedDict,
-                    MK.Content: {
-                        "a": {MK.Type: configsuite.types.Number, MK.Default: 0}
-                    },
-                },
-            },
-        }
-
-        suite = configsuite.ConfigSuite({}, schema, deduce_required=True)
-        self.assertTrue(suite.valid, suite.errors)
-        self.assertEqual((), suite.snapshot.list)
-        self.assertEqual((), suite.snapshot.dict)
-        self.assertEqual(0, suite.snapshot.named_dict.a)
-
-    def test_list_errors(self):
-        raw_config = data.pets.build_config()
-        raw_config["playgrounds"] = [{"name": "faulty grounds"}]
-        config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
-
-        self.assertFalse(config_suite.valid)
-        self.assertEqual(1, len(config_suite.errors))
-        err = config_suite.errors[0]
-        self.assertIsInstance(err, configsuite.MissingKeyError)
-        self.assertEqual(("playgrounds", 0), err.key_path)
-
-    def test_list_cannot_spec_required(self):
-        schema = {
-            MK.Type: configsuite.types.List,
-            MK.Content: {MK.Item: {MK.Type: configsuite.types.Integer}},
-        }
-        config_suite = configsuite.ConfigSuite([], schema)
-        self.assertTrue(config_suite.valid)
-
-        for req in (True, False):
-            schema[MK.Required] = req
-            with self.assertRaises(ValueError) as err:
-                configsuite.ConfigSuite([], schema)
-            self.assertIn("Required can only be used for BasicType", str(err.exception))
-
-    def test_named_dict_cannot_spec_required(self):
-        schema = {
-            MK.Type: configsuite.types.NamedDict,
-            MK.Content: {"key": {MK.Type: configsuite.types.Integer}},
-        }
-        config_suite = configsuite.ConfigSuite({"key": 42}, schema)
-        self.assertTrue(config_suite.valid)
-
-        for req in (True, False):
-            schema[MK.Required] = req
-            with self.assertRaises(ValueError) as err:
-                configsuite.ConfigSuite({"key": 42}, schema)
-            self.assertIn("Required can only be used for BasicType", str(err.exception))
-
-    def test_dict_cannot_spec_required(self):
-        schema = {
-            MK.Type: configsuite.types.Dict,
-            MK.Content: {
-                MK.Key: {MK.Type: configsuite.types.String},
-                MK.Value: {MK.Type: configsuite.types.String},
-            },
-        }
-        config_suite = configsuite.ConfigSuite({}, schema)
-        self.assertTrue(config_suite.valid)
-
-        for req in (True, False):
-            schema[MK.Required] = req
-            with self.assertRaises(ValueError) as err:
-                configsuite.ConfigSuite({}, schema)
-            self.assertIn("Required can only be used for BasicType", str(err.exception))
-
     def test_date(self):
         timestamp = datetime.datetime(2015, 1, 2, 3, 4, 5)
         date = datetime.date(2010, 1, 1)
@@ -309,3 +185,13 @@ class TestTypes(unittest.TestCase):
         for elem in elements:
             with self.assertRaises(TypeError):
                 configsuite.types.BooleanResult(elem, "incorrect", "type")
+
+    def test_allow_empty_basic_type_invalid(self):
+        for val in [True, False]:
+            schema = {MK.Type: configsuite.types.String, MK.AllowEmpty: val}
+            with self.assertRaises(ValueError) as err:
+                configsuite.ConfigSuite("fdsfds", schema)
+            self.assertIn(
+                "Only variable length containers can specify AllowEmpty is false",
+                str(err.exception),
+            )

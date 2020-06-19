@@ -568,6 +568,37 @@ in order for a configuration with ``None`` to pass.
     Scrooge has a credit of None
 
 
+Allow Empty
+-----------
+
+Occasionally one would like to require variable length containers (lists and
+dicts) to have at least one element. This can be implemented with a validator
+on the container (see :ref:`Validators-section`). However, as this feature have
+been requested multiple times, we've decided to implement
+explicit support for it without having to implement your own validator. Note
+that by default all containers are allowed to be empty.
+
+.. testcode:: [allowempty]
+
+    import configsuite
+    from configsuite import types
+    from configsuite import MetaKeys as MK
+
+    schema = {
+        MK.Type: types.List,
+        MK.AllowEmpty: False,
+        MK.Content: {
+            MK.Item: {MK.Type: types.Integer},
+        },
+    }
+
+    non_empty_suite = configsuite.ConfigSuite([0, 1, 2, 3, 4], schema)
+    assert non_empty_suite.valid
+
+    empty_suite = configsuite.ConfigSuite([], schema)
+    assert not empty_suite.valid
+
+
 Default values
 --------------
 
@@ -880,6 +911,8 @@ for every container. The id is for e.g. ``cs_{}_container``, where ``{}``
 will be replaced by the title.
 
 You can then include a customized ``.css`` file that acts on each item.
+
+.. _validators-section:
 
 Validators
 ----------
