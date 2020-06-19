@@ -75,6 +75,9 @@ class Validator(object):
         if self._apply_validators and valid:
             valid &= self._context_validation(config, schema)
 
+        if self._apply_validators and valid:
+            valid &= self._length_validation(config, schema)
+
         return bool(valid)
 
     def _element_validation(self, config, schema):
@@ -88,6 +91,13 @@ class Validator(object):
                 self._add_invalid_value_error(res.msg)
 
         return valid
+
+    def _length_validation(self, config, schema):
+        if not schema.get(MK.AllowEmpty, True) and len(config) == 0:
+            self._add_invalid_value_error("Expected non-empty container")
+            return False
+
+        return True
 
     def _context_validation(self, config, schema):
         context_validators = schema.get(MK.ContextValidators, ())

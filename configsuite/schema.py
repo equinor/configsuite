@@ -76,9 +76,17 @@ def _check_required_not_default(schema_level):
     return True
 
 
+@configsuite.validator_msg("Only variable length containers can specify AllowEmpty")
+def _check_allowempty_only_variable_containers(schema_level):
+    level_type = schema_level.get(MK.Type)
+    const_len = isinstance(level_type, types.BasicType) or level_type == types.NamedDict
+    return not (const_len and MK.AllowEmpty in schema_level)
+
+
 _SCHEMA_LEVEL_DEFAULTS = {
     MK.Required: True,
     MK.AllowNone: False,
+    MK.AllowEmpty: True,
     MK.Description: "",
     MK.ElementValidators: (),
     MK.ContextValidators: (),
@@ -93,6 +101,7 @@ META_SCHEMA = {
         _check_default_type,
         _check_allownone_required,
         _check_required_not_default,
+        _check_allowempty_only_variable_containers,
     ),
     MK.Content: {
         MK.Type: {MK.Type: types.Type},
@@ -136,14 +145,19 @@ META_SCHEMA = {
             MK.AllowNone: True,
         },
         MK.Content: {MK.Type: _Anytype},
+        MK.AllowEmpty: {
+            MK.Type: types.Bool,
+            MK.Required: False,
+            MK.Default: _SCHEMA_LEVEL_DEFAULTS[MK.AllowEmpty],
+        },
     },
 }
 
 
-def _build_meta_schema(deduce_required, basic_type):
+def _build_meta_schema(deduce_required, schema_type):
     meta_schema = copy.deepcopy(META_SCHEMA)
 
-    if basic_type:
+    if isinstance(schema_type, types.BasicType):
         meta_schema[MK.Content].pop(MK.Content)
 
     if deduce_required:
@@ -151,6 +165,7 @@ def _build_meta_schema(deduce_required, basic_type):
             _check_allownone_type,
             _check_required_type,
             _check_default_type,
+            _check_allowempty_only_variable_containers,
         )
 
     return meta_schema
@@ -210,16 +225,21 @@ def _assert_valid_schema(schema, allow_default, validate_named_keys, deduce_requ
 def _build_level_schema(schema):
     schema = copy.deepcopy(schema)
     level_schema = copy.deepcopy(_SCHEMA_LEVEL_DEFAULTS)
+    is_basic_type = isinstance(schema[MK.Type], types.BasicType)
 
     # Discard ignore from default if not in level schema
     if MK.Required not in schema:
         level_schema.pop(MK.Required)
 
     # Discard basic type defaults for non-basic types
-    if not isinstance(schema[MK.Type], types.BasicType):
+    if not is_basic_type:
         for basic_key in (MK.Required, MK.Default, MK.AllowNone):
             if basic_key in level_schema:
                 level_schema.pop(basic_key)
+
+    # Discard allow_empty default for basic types and named dicts
+    if is_basic_type or schema[MK.Type] == types.NamedDict:
+        level_schema.pop(MK.AllowEmpty)
 
     level_schema.update(schema)
     return level_schema
@@ -235,8 +255,7 @@ def _assert_valid_schema_level(schema, allow_default, deduce_required):
         fmt = "Default value is only allowed for contents in NamedDict"
         raise ValueError(fmt)
 
-    is_basic_type = isinstance(schema.get(MK.Type), types.BasicType)
-    meta_schema = _build_meta_schema(deduce_required, is_basic_type)
+    meta_schema = _build_meta_schema(deduce_required, schema.get(MK.Type))
     level_validator = configsuite.Validator(meta_schema)
     result = level_validator.validate(schema)
 
