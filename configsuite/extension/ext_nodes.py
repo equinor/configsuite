@@ -48,9 +48,10 @@ def depart_container(self, node):
         example_doc = example_doc.replace("\n", "<br>")
         example_doc = example_doc.replace("    ", "&nbsp;&nbsp;")
         self.body.append(
-            "<div class='cs_content'>Example:<br><code>{}</code><br></div>".format(
-                example_doc
-            )
+            (
+                "<div class='cs_content'>Example:<br>"
+                "<code class='cs_code'>{}</code><br></div>"
+            ).format(example_doc)
         )
     self.body.append("</div><br>")
 
