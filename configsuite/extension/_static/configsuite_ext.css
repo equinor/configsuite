@@ -38,7 +38,7 @@ in all copies or substantial portions of the Software.
   padding-left: 5px;
 }
 
-code {
+.cs_code {
   background-color: #eee;
   border: 1px solid #999;
   display: block;
