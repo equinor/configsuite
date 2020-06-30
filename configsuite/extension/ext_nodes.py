@@ -43,7 +43,7 @@ def visit_container(self, node):
 
 def depart_container(self, node):
 
-    if node.hasattr("example"):
+    if node.hasattr("example") and node["example"] is not None:
         example_doc = yaml.dump(node["example"], indent=4)
         example_doc = example_doc.replace("\n", "<br>")
         example_doc = example_doc.replace("    ", "&nbsp;&nbsp;")
