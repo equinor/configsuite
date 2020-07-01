@@ -13,6 +13,9 @@ Release Notes
 dev
 ---
 
+0.6.3 (2020-07-01)
+------------------
+
 **Improvements**
  - Have the Sphinx plugin only render examples if they are provided
 
