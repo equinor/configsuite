@@ -13,6 +13,12 @@ Release Notes
 dev
 ---
 
+**Improvements**
+ - Have the Sphinx plugin only render examples if they are provided
+
+**Bugfix**
+ - Make the Sphinx plugin's CSS changes local to the plugin
+
 0.6.2 (2020-06-10)
 ------------------
 
