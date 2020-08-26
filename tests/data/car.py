@@ -154,3 +154,10 @@ def build_config():
             {"location": "somewhere else", "casualties": 1},
         ],
     }
+
+
+def build_schema_with_default_arguments(_arg1=None, _arg2=42):
+    """Test function which has arguments, but only arguments
+    with default values.
+    """
+    return build_schema_with_validators_and_transformators()

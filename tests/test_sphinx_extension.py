@@ -30,7 +30,7 @@ def func_returns_int():
     return 1
 
 
-def func_takes_arguments(arg1):  # pylint: disable=unused-argument
+def func_takes_arguments(_arg1):
     return {}
 
 
@@ -146,7 +146,7 @@ class TestSphinxExtension(unittest.TestCase):
 
     @tmpdir("tests/data/doc")
     @with_sphinx_app()
-    def test_func_takes_no_arguments(self, app):
+    def test_func_takes_no_nondefault_arguments(self, app):
         invalid_func = """
         .. configsuite::
             :module: tests.test_sphinx_extension.func_takes_arguments
@@ -159,7 +159,11 @@ class TestSphinxExtension(unittest.TestCase):
             app.build()
 
         self.assertTrue(
-            "not require any arguments, the 'func_takes_arguments' takes 1 argument(s)"
+            (
+                "can not require any arguments without default value, "
+                "the 'func_takes_arguments' takes 1 argument(s) and "
+                "has 0 default value(s)."
+            )
             in str(context.exception)
         )
 
@@ -202,31 +206,39 @@ class TestSphinxExtension(unittest.TestCase):
     @tmpdir("tests/data/doc")
     @with_sphinx_app()
     def test_sphinx_complete_generation(self, app):
-        complete_schema = """
-        .. configsuite::
-            :module: tests.data.car.build_schema_with_validators_and_transformators
-        """
-        with open("index.rst", "w") as f:
-            f.write(complete_schema)
+        for function in [
+            "build_schema_with_validators_and_transformators",
+            "build_schema_with_default_arguments",
+        ]:
+            with self.subTest():
+                complete_schema = """
+                .. configsuite::
+                    :module: tests.data.car.{function}
+                """.format(
+                    function=function
+                )
 
-        app.build()
-        with open(os.path.join(app.outdir, "index.html"), "r") as f:
-            html = f.read()
+                with open("index.rst", "w") as f:
+                    f.write(complete_schema)
 
-        contents = [
-            "production_date",
-            "country",
-            #  "Norway",
-            "tire",
-            "dimension",
-            # "17",
-            "owner",
-            "location",
-            "incidents",
-            "Convert to cm",
-            "Convert to cm - ignoring context",
-            "Is x a valid date",
-            "Is x a valid dimension",
-        ]
-        for content in contents:
-            self.assertTrue(content in html)
+                app.build()
+                with open(os.path.join(app.outdir, "index.html"), "r") as f:
+                    html = f.read()
+
+                contents = [
+                    "production_date",
+                    "country",
+                    #  "Norway",
+                    "tire",
+                    "dimension",
+                    # "17",
+                    "owner",
+                    "location",
+                    "incidents",
+                    "Convert to cm",
+                    "Convert to cm - ignoring context",
+                    "Is x a valid date",
+                    "Is x a valid dimension",
+                ]
+                for content in contents:
+                    self.assertTrue(content in html)

@@ -188,14 +188,20 @@ class ConfigsuiteDocDirective(Directive):
             raise self.error(err_msg.format(func_name=func_str))
 
         insp = inspect_method(schema_func)  # pylint: disable=deprecated-method
-        if len(insp.args) != 0:
+        num_defaults = 0 if insp.defaults is None else len(insp.defaults)
+        if len(insp.args) > num_defaults:
             err_msg = (
                 "The module.function given at Configsuite :module: "
-                + "can not require any arguments, the '{func_name}' "
-                + "takes {num_args} argument(s)"
+                + "can not require any arguments without default value, "
+                + "the '{func_name}' takes {num_args} argument(s) and "
+                + "has {num_defaults} default value(s)."
             )
             raise self.error(
-                err_msg.format(func_name=func_str, num_args=len(insp.args))
+                err_msg.format(
+                    func_name=func_str,
+                    num_args=len(insp.args),
+                    num_defaults=num_defaults,
+                )
             )
 
         schema = schema_func()
