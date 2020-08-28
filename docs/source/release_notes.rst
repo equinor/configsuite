@@ -13,6 +13,9 @@ Release Notes
 dev
 ---
 
+**Deprecations**
+ - Drop Python 2.7 support
+
 0.6.3 (2020-07-01)
 ------------------
 

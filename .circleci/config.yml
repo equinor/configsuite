@@ -34,12 +34,6 @@ commands:
           destination: test-results
 
 jobs:
-  python-27:
-    docker:
-      - image: circleci/python:2.7
-    steps:
-      - python_build:
-          python_version: "2.7"
   python-35:
     docker:
       - image: circleci/python:3.5
@@ -69,7 +63,6 @@ jobs:
 workflows:
   build:
     jobs:
-      - python-27
       - python-35
       - python-36
       - python-37

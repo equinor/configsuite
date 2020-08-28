@@ -59,12 +59,10 @@ setuptools.setup(
         "Topic :: Software Development :: Documentation",
         "Topic :: Utilities",
     ],
-    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
+    python_requires=">=3.5",
     install_requires=[
-        "enum34 >= 1.0 ; python_version<'3.4'",
         "six >= 1.0",
-        "PyYAML<=5.2 ; python_version<='3.4'",
-        "PyYAML ; python_version>'3.4'",
+        "PyYAML",
     ],
     setup_requires=["setuptools_scm", "setuptools_scm_about"],
     tests_require=[
