@@ -61,7 +61,6 @@ setuptools.setup(
     ],
     python_requires=">=3.5",
     install_requires=[
-        "six >= 1.0",
         "PyYAML",
     ],
     setup_requires=["setuptools_scm", "setuptools_scm_about"],
