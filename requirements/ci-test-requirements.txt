@@ -1,19 +1,13 @@
 coverage==5.1
-pytest==4.6.9 ; python_version<'3.5' # rq.filter: <5
-pytest==5.4.1 ; python_version>='3.5'
+pytest==5.4.1
 pytest-runner==5.2
-pytest-pylint==0.14.1 ; python_version<'3' # rq.filter: < 0.15
-pytest-pylint==0.16.1 ; python_version>='3'
+pytest-pylint==0.16.1
 pytest-flake8==1.0.5
 black==19.10b0 ; python_version>='3.6'
 click==7.1.2 ; python_version>='3.6'
-pylint==2.5.0 ; python_version>='3.5'
-pylint==2.3.1 ; python_version>='3' and python_version<'3.5' # rq.filter: <2.4
-pylint==1.9.5 ; python_version<'3' # rq.filter: <2
+pylint==2.5.0
 pytest-cov==2.8.1
 jinja2==2.11.2
-unittest-xml-reporting==2.5.2 ; python_version<'3' # rq.filter: < 3
-unittest-xml-reporting==3.0.2 ; python_version>='3'
+unittest-xml-reporting==3.0.2
 flake8==3.7.9
-sphinx==3.0.3 ; python_version>='3.5'
-sphinx==1.8.5 ; python_version<'3.5' # rq.filter: <2
+sphinx==3.0.3
