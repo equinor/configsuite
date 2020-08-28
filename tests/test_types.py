@@ -19,7 +19,6 @@ in all copies or substantial portions of the Software.
 import datetime
 import numbers
 import unittest
-import six
 
 import configsuite
 from configsuite import MetaKeys as MK
@@ -87,7 +86,7 @@ class TestTypes(unittest.TestCase):
             raw_config["name"] = strval
             config_suite = configsuite.ConfigSuite(raw_config, data.pets.build_schema())
 
-            if isinstance(strval, six.string_types):
+            if isinstance(strval, str):
                 self.assertTrue(config_suite.valid)
                 self.assertEqual(strval, config_suite.snapshot.name)
                 self.assertEqual(0, len(config_suite.errors))

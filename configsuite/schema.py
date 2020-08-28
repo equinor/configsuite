@@ -18,7 +18,6 @@ in all copies or substantial portions of the Software.
 
 import copy
 import re
-import six
 import warnings
 
 import configsuite
@@ -260,7 +259,7 @@ def _assert_valid_schema_level(schema, allow_default, deduce_required):
 
 
 def _assert_dict_key(key):
-    if not isinstance(key, six.string_types):
+    if not isinstance(key, str):
         raise KeyError(
             "Expected all {} keys to be strings, found: {}"
             "".format(types.NamedDict.name, type(key))

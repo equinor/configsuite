@@ -17,8 +17,6 @@ in all copies or substantial portions of the Software.
 """
 
 
-import six
-
 import configsuite
 from configsuite import MetaKeys as MK
 from configsuite import types
@@ -36,7 +34,7 @@ def _realize_list(l):
 
     _realize_list('1,2,4-7,14-15') -> [1, 2, 4, 5, 6, 7, 14, 15]
     """
-    if not isinstance(l, six.string_types):
+    if not isinstance(l, str):
         return l
 
     real_list = []
