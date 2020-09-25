@@ -13,6 +13,9 @@ Release Notes
 dev
 ---
 
+0.6.4 (2020-09-25)
+------------------
+
 **Improvements**
  - Validate that content is specified in schema if and only if element is a container.
 
