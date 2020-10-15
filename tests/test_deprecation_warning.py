@@ -26,18 +26,33 @@ from configsuite import types
 
 
 class TestRequiredDeprecated(unittest.TestCase):
-    def test_explicit_required_is_deprecated(self):
+    def test_not_true_nor_none_deduce_required_gives_error(self):
+        for deduce in [False, 0, "???"]:
+            schema = {MK.Type: types.Integer}
+            with self.assertRaises(ValueError) as context:
+                configsuite.ConfigSuite(4, schema, deduce_required=deduce)
+
+            self.assertTrue("Whether entries are required must be deduced." in str(context.exception))
+
+    def test_explicit_deduce_required_is_deprecated(self):
+        schema = {MK.Type: types.Integer}
+        with warnings.catch_warnings(record=True) as wc:
+            configsuite.ConfigSuite(4, schema, deduce_required=True)
+            self.assertEqual(1, len(wc))
+            self.assertEqual(__file__, wc[0].filename)
+            self.assertIn(
+                "Explicitly setting `deduce_required` will not be possible",
+                str(wc[0].message)
+            )
+
+    def test_explicit_required_gives_error(self):
         schema = {
             MK.Type: types.NamedDict,
             MK.Content: {"some_key": {MK.Type: types.String, MK.Required: True}},
         }
-        with warnings.catch_warnings(record=True) as wc:
+        with self.assertRaises(KeyError) as context:
             configsuite.ConfigSuite({}, schema)
-            self.assertEqual(1, len(wc))
-            self.assertEqual(__file__, wc[0].filename)
-            self.assertIn(
-                "Use `ConfigSuite(..., deduce_required=True)`", str(wc[0].message)
-            )
+        self.assertTrue("TODO" in str(context.exception))
 
     def test_specifying_required_is_deprecated_when_deducing(self):
         schema = {

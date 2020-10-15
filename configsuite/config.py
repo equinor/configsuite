@@ -20,10 +20,24 @@ in all copies or substantial portions of the Software.
 import copy
 import configsuite
 import collections
+import warnings
 
 
 from .schema import assert_valid_schema
 from .meta_keys import MetaKeys as MK
+
+
+def _assert_deduce_required(deduce_required):
+    if deduce_required not in [True, None]:
+        raise ValueError("Whether entries are required must be deduced.")
+
+    if deduce_required is True:
+        warnings.warn(
+            "Explicitly setting `deduce_required` will not be possible in configsuite "
+            "0.8. Not passing deduce_required is equivalent to setting it to True.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
 
 
 class ConfigSuite(object):
@@ -75,8 +89,11 @@ class ConfigSuite(object):
         layers=(),
         extract_validation_context=lambda snapshot: None,
         extract_transformation_context=lambda snapshot: None,
-        deduce_required=False,
+        deduce_required=None,
     ):
+        #_assert_deduce_required(deduce_required)
+        #deduce_required=True
+
         assert_valid_schema(schema, deduce_required=deduce_required)
         self._layers = tuple(
             [copy.deepcopy(layer) for layer in tuple(layers) + (raw_config,)]
