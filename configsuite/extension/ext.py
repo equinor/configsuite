@@ -18,13 +18,7 @@ in all copies or substantial portions of the Software.
 
 import os
 import importlib
-
-# The getargspec/getfullargspec should be dropped
-# for the "signature" module when python2 is not supported
-try:
-    from inspect import getfullargspec as inspect_method
-except ImportError:
-    from inspect import getargspec as inspect_method
+import inspect
 
 from docutils.parsers.rst import Directive
 from docutils.parsers.rst.directives import unchanged_required
@@ -187,7 +181,7 @@ class ConfigsuiteDocDirective(Directive):
             )
             raise self.error(err_msg.format(func_name=func_str))
 
-        insp = inspect_method(schema_func)  # pylint: disable=deprecated-method
+        insp = inspect.getfullargspec(schema_func)
         if len(insp.args) != 0:
             err_msg = (
                 "The module.function given at Configsuite :module: "
