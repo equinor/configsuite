@@ -212,7 +212,8 @@ def _assert_valid_schema(schema, allow_default, validate_named_keys, deduce_requ
     level_type = schema[MK.Type]
     if isinstance(level_type, types.BasicType):
         return
-    elif level_type == types.NamedDict:
+
+    if level_type == types.NamedDict:
         _assert_valid_named_dict_schema(schema, validate_named_keys, deduce_required)
     elif level_type == types.List:
         _assert_valid_list_schema(schema, validate_named_keys, deduce_required)
@@ -267,16 +268,16 @@ def _assert_valid_schema_level(schema, allow_default, deduce_required):
 
             if isinstance(error, configsuite.MissingKeyError):
                 raise KeyError(gen_err_msg(error))
-            elif isinstance(error, configsuite.UnknownKeyError):
+            if isinstance(error, configsuite.UnknownKeyError):
                 raise KeyError(gen_err_msg(error))
-            elif isinstance(error, configsuite.InvalidTypeError):
+            if isinstance(error, configsuite.InvalidTypeError):
                 raise TypeError(gen_err_msg(error))
-            elif isinstance(error, configsuite.InvalidValueError):
+            if isinstance(error, configsuite.InvalidValueError):
                 raise ValueError(gen_err_msg(error))
-            else:
-                raise AssertionError(
-                    "Internal error: Unknown validation error: {}".format(error)
-                )
+
+            raise AssertionError(
+                "Internal error: Unknown validation error: {}".format(error)
+            )
 
 
 def _assert_dict_key(key):

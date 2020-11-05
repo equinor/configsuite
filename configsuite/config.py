@@ -280,15 +280,15 @@ class ConfigSuite:
 
         if isinstance(data_type, configsuite.types.BasicType):
             return layers[-1]
-        elif data_type == configsuite.types.List:
+        if data_type == configsuite.types.List:
             return self._build_initial_list_merged_config(layers, schema)
-        elif data_type == configsuite.types.NamedDict:
+        if data_type == configsuite.types.NamedDict:
             return self._build_initial_named_dict_merged_config(layers, schema)
-        elif data_type == configsuite.types.Dict:
+        if data_type == configsuite.types.Dict:
             return self._build_initial_dict_merged_config(layers, schema)
-        else:
-            msg = "Encountered unknown type {} while building raw config"
-            raise TypeError(msg.format(str(data_type)))
+
+        msg = "Encountered unknown type {} while building raw config"
+        raise TypeError(msg.format(str(data_type)))
 
     def _apply_transformations(self, config):
         transformer = configsuite.Transformer(self._schema, MK.Transformation, ())
@@ -355,15 +355,15 @@ class ConfigSuite:
         data_type = schema[MK.Type]
         if isinstance(data_type, configsuite.BasicType):
             return config
-        elif data_type == configsuite.types.NamedDict:
+        if data_type == configsuite.types.NamedDict:
             return self._build_named_dict_snapshot(config, schema)
-        elif data_type == configsuite.types.List:
+        if data_type == configsuite.types.List:
             return self._build_list_snapshot(config, schema)
-        elif data_type == configsuite.types.Dict:
+        if data_type == configsuite.types.Dict:
             return self._build_dict_snapshot(config, schema)
-        else:
-            msg = "Encountered unknown type {} while building snapshot"
-            raise TypeError(msg.format(str(data_type)))
+
+        msg = "Encountered unknown type {} while building snapshot"
+        raise TypeError(msg.format(str(data_type)))
 
     def _validate_readability(self, layers):
         readable_errors = (configsuite.UnknownKeyError, configsuite.MissingKeyError)
