@@ -51,8 +51,6 @@ confidence=
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
 disable=
-    len-as-condition,
-    wrong-import-order,
     bad-continuation,
     missing-docstring,
     invalid-name,

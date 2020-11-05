@@ -18,9 +18,9 @@ in all copies or substantial portions of the Software.
 
 
 import copy
-import configsuite
 import collections
 
+import configsuite
 
 from .schema import assert_valid_schema
 from .meta_keys import MetaKeys as MK
