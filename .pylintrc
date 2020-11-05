@@ -51,7 +51,6 @@ confidence=
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
 disable=
-    superfluous-parens,
     len-as-condition,
     wrong-import-order,
     bad-continuation,

@@ -50,9 +50,6 @@ class ValidationError(object):
             and self.layer == other.layer
         )
 
-    def __neq__(self, other):
-        return not (self == other)
-
     def __hash__(self):
         return hash((self.msg, self.key_path, self.layer))
 
