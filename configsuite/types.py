@@ -22,7 +22,7 @@ import numbers
 import datetime
 
 
-class BooleanResult(object):
+class BooleanResult:
     """BooleanResult is a wrapper around a bool that also has a .msg attribute.
 
     The message is an explanation of the boolean value.
@@ -64,7 +64,7 @@ def transformation_msg(msg):
     """
 
     def real_decorator(function):
-        class Wrapper(object):
+        class Wrapper:
             def __init__(self, function, msg):
                 self._function = function
                 self._msg = msg
@@ -108,7 +108,7 @@ def validator_msg(msg):
 
             return ", ".join(elems)
 
-        class Wrapper(object):
+        class Wrapper:
             def __init__(self, function, msg):
                 self._function = function
                 self._msg = msg

@@ -26,7 +26,7 @@ from .schema import assert_valid_schema
 from .meta_keys import MetaKeys as MK
 
 
-class ConfigSuite(object):
+class ConfigSuite:
     """A `Suite` exposing the functionality of Config Suite in a unified manner.
 
     The intended usage of Config Suite is via this immutable suite. It is constructed

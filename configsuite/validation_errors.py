@@ -17,7 +17,7 @@ in all copies or substantial portions of the Software.
 """
 
 
-class ValidationError(object):
+class ValidationError:
     def __init__(self, message, key_path, layer=None):
         self._message = message
         self._key_path = key_path

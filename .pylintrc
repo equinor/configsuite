@@ -54,7 +54,6 @@ disable=
     bad-continuation,
     missing-docstring,
     invalid-name,
-    useless-object-inheritance,
     duplicate-code,
     no-else-return,
     no-else-raise,

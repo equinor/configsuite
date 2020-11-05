@@ -28,7 +28,7 @@ TransformationResult = collections.namedtuple(
 )
 
 
-class Transformer(object):
+class Transformer:
     def __init__(
         self, schema, transformation_type, transformation_context, bottom_up=True
     ):

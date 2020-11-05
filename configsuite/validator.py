@@ -25,7 +25,7 @@ from configsuite import MetaKeys as MK
 ValidationResult = collections.namedtuple("ValidationResult", ("valid", "errors"))
 
 
-class Validator(object):
+class Validator:
     def __init__(
         self, schema, stop_condition=(lambda schema: False), apply_validators=True
     ):
@@ -192,7 +192,7 @@ class Validator(object):
         self._errors.append(err)
 
 
-class _KeyStack(object):
+class _KeyStack:
     def __init__(self):
         self._stack = []
 

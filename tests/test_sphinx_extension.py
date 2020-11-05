@@ -55,7 +55,7 @@ class MockApp(Sphinx):
         )
 
 
-class with_sphinx_app(object):
+class with_sphinx_app:
     def __init__(self, *sphinxargs, **sphinxkwargs):
         self.sphinxargs = sphinxargs
         self.sphinxkwargs = sphinxkwargs
