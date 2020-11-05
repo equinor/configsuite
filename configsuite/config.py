@@ -76,7 +76,7 @@ class ConfigSuite:
         extract_validation_context=lambda snapshot: None,
         extract_transformation_context=lambda snapshot: None,
         deduce_required=False,
-    ):
+    ):  # pylint: disable=too-many-arguments
         assert_valid_schema(schema, deduce_required=deduce_required)
         self._layers = tuple(
             [copy.deepcopy(layer) for layer in tuple(layers) + (raw_config,)]
