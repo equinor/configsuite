@@ -13,6 +13,9 @@ Release Notes
 dev
 ---
 
+0.6.5 (2020-11-27)
+------------------
+
 **New features**
  - Add possibility in schema to specify whether a variable length container (list or dict) is allowed to be empty
 
