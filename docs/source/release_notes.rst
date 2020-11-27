@@ -16,6 +16,9 @@ dev
 **New features**
  - Add possibility in schema to specify whether a variable length container (list or dict) is allowed to be empty
 
+**Miscellaneous**
+ - Replace usage of deprecated inspect methods
+
 0.6.4 (2020-09-25)
 ------------------
 
