@@ -1,6 +1,5 @@
 # Config Suite #
 
-[![Build Status](https://travis-ci.org/equinor/configsuite.svg?branch=master)](https://travis-ci.org/equinor/configsuite)
 [![CircleCI](https://circleci.com/gh/equinor/configsuite.svg?style=svg)](https://circleci.com/gh/equinor/configsuite)
 [![GitHub Actions](https://github.com/equinor/configsuite/workflows/configsuite/badge.svg)](https://github.com/features/actions)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
