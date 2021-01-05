@@ -13,6 +13,9 @@ Release Notes
 dev
 ---
 
+**Miscellaneous**
+ - Stop running CI on Travis and move PyPI deploy to GitHub Actions
+
 0.6.5 (2020-11-27)
 ------------------
 
