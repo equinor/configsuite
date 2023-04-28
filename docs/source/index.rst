@@ -30,7 +30,7 @@ A guide through the universe of *Config Suite*.
 Additional examples
 -------------------
 
-For additional examples we refer the reader to the `test data <https://github.com/equinor/configsuite/tree/master/tests/data>`_.
+For additional examples we refer the reader to the `test data <https://github.com/equinor/configsuite/tree/main/tests/data>`_.
 
 Release Notes
 -------------
