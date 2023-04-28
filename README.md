@@ -6,7 +6,7 @@
 [![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/042d23ea22084a1c8c7396edc6d1709f)](https://www.codacy.com/app/markusdregi/configsuite?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=equinor/configsuite&amp;utm_campaign=Badge_Grade)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/042d23ea22084a1c8c7396edc6d1709f)](https://www.codacy.com/app/markusdregi/configsuite?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=equinor/configsuite&amp;utm_campaign=Badge_Coverage)
-[![Requirements Status](https://requires.io/github/equinor/configsuite/requirements.svg?branch=master)](https://requires.io/github/equinor/configsuite/requirements/?branch=master)
+[![Requirements Status](https://requires.io/github/equinor/configsuite/requirements.svg?branch=main)](https://requires.io/github/equinor/configsuite/requirements/?branch=main)
 [![Documentation Status](https://readthedocs.org/projects/configsuite/badge/?version=latest)](https://configsuite.readthedocs.io/en/latest/?badge=latest)
 
 ## Introduction ##
@@ -46,4 +46,4 @@ We expect a well-written explanation for smaller PR's and a reference to an issu
 
 ## License ##
 _Config Suite_ is licensed under the MIT License. For more information we refer
-the reader to the [LICENSE file](https://github.com/equinor/configsuite/blob/master/LICENSE).
+the reader to the [LICENSE file](https://github.com/equinor/configsuite/blob/main/LICENSE).

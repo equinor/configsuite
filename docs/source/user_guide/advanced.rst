@@ -418,7 +418,7 @@ gives the specification of a list of integers for which one can instead provide
 strings of ranges and singletons in some of the layers. For a full
 implementation, where in addition the final list (after the layers have been
 merged) is sorted and duplicates are removed we refer the reader to the `test
-data <https://github.com/equinor/configsuite/blob/master/tests/data/numbers.py>`_.
+data <https://github.com/equinor/configsuite/blob/main/tests/data/numbers.py>`_.
 
 Note that for the layer transformations to give the intended functionality they
 are applied in a top down manner. This is another distinction from the other
